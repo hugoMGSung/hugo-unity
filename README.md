@@ -55,5 +55,24 @@
 
 
 
-## 유니티를 이용한 하이브리드 캐주얼게임 클로닝
+### 유니티를 이용한 하이브리드 캐주얼게임 클로닝
 
+
+### Unity ML-Agents
+- Unity Machine Learning Agents Toolkit(ML-Agents)은 게임과 시뮬레이션을 지능형 에이전트 훈련 환경으로 활용할 수 있도록 하는 오픈소스 프로젝트
+- PyTorch 기반의 최첨단 알고리즘 구현을 제공하여 게임 개발자와 취미 개발자들이 2D, 3D 및 VR/AR 게임용 지능형 에이전트를 쉽게 훈련할 수 있도록 지원
+
+#### ML-Agents 다운로드
+- https://github.com/Unity-Technologies/ml-agents
+- ML-Agents Release 22 다운로드
+
+#### Python 가상환경 활성화
+- Python 3.10 버전에 맞추기
+- 파이썬 가상환경
+
+    ```shell
+    > python -m venv mlagent-env
+    > pip install mlagents
+    ```
+
+- 계속 [링크](https://patrasche25.tistory.com/135)
