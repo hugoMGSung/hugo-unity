@@ -205,4 +205,13 @@
 
     https://github.com/user-attachments/assets/b908624c-bc3a-4a63-9036-82d762fc055c
 
-    
+
+    - 공이 작으면 없었던 머리 밖으로 넘어가 떨어지는 현상 발생
+
+
+### 환경빌드
+- File > Build Profiles 클릭
+    - Scene List에 원하는 신 선택
+    - Windnows 기본 설정에 Build And Run 클릭 후 폴더 선택
+
+    <img src="./image/unity0005.png" width="600">
