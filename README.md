@@ -147,3 +147,58 @@
     https://github.com/user-attachments/assets/f3bd2126-c04c-4fde-8d89-497d64e43e68
 
 
+- 12개의 동일한 3DBall 객체로 구성
+- 각 객체는 아래와 같이 구성 
+    - Ball
+    - Agent
+        - AgentCube_Blue
+            - AgentCamera
+            - eye
+            - eye
+            - mouth
+            - Headband
+
+- 하위 Agent에서의 ML-Agents 요소들
+
+    <img src="./image/unity0004.png" width="600">
+
+    - **Behavior Parameters** : 핵심 설정 컴포넌트. 관측/행동 스펙과 모델 지정
+        - `Behavior Name` - 에인전트 행동 이름. Python측 config.yaml 파일과 매칭되어야 함
+        - `Vector Observation` - 수자벡터로 에이전트 환경을 관찰
+            - `Space Size` - 에이전트가 한 시점에 관찰하는 float값의 개수
+            - Stacked Vectors - 이전 관측 프레임들을 몇 개까지 누적할 것인지 설정
+        - `Actions` - 학습 결과로 얻은 행동(action) 값을 환경에 적용
+            - `Continuous Actions` - 실수(float) 범위의 연속적인 값
+            - `Descreate Branches` - 정수(int) 중 하나를 선택하는 분류 방식
+        - `Model` - .onnx 파일 연결. 훈련된 모델을 여기 연결하면 추론모드에서 사용
+            - Inference Device - 추론시 사용할 디바이스. 
+            - `Deterministic Inference` - 항상 같은 입력에 대해 같은 행동을 하도록 만들 것인지 여부
+        - `Behavior Type` - Default(훈련또는 추론), Heuristic Only(사람이 제어), Inference Only(훈련된 모델만) 중 선택
+        - Team Id - 에이전트가 속한 팀 번호
+        - Use Child Sensors - Sensor 컴포넌트들까지 자동으로 활성화할지 여부
+        - Observable Attribute Handling - 자동으로 관측 정보를 수집할 것인지 여부
+    - Ball 3D Agent(Script) : 스크립트에서 학습 행동 정의
+        - `Max Step` - 한 에피소드에서 에이전트가 행동할 수 있는 최대 Step 수
+        - Specific to Ball3D - 이 항목은 실제로 존재하지 않는 값
+        - Ball - 공 오브젝트 (Ball 또는 Sphere 등)를 가리키는 참조 변수
+        - Use Vec Obs - 벡터 관측 사용 여부를 켜고 끌 수 있는 Boolean 스위치
+    - Decision Requester : 매 프레임 판단 요청 자동화
+        - Script - 사용자 설정과는 관계없는 Unity의 내부 표시 용도
+        - `Decision Period` - 몇 프레임마다 판단(decision)을 요청할지. 1(매프레임마다), 5(5프레임마다)
+        - Decision Step - 현재 스텝이 몇 번째 decision 스텝인지(읽기전용)
+        - `Take Actions Between Decisions` - 판단이 없는 프레임에서도 에이전트가 이전 행동을 계속 수행할지 여부
+    - Model Overrider(Script) : 실험적 모델 덮어쓰기
+        - Script - 
+        - Debug Command Line Override - 외부에서 모델(.onnx) 경로를 덮어씌울 수 있는 옵션
+
+- Ball3DAgent 스크립트
+
+    ```cs
+    public void SetBall()
+    {
+        //Set the attributes of the ball by fetching the information from the academy
+        m_BallRb.mass = m_ResetParams.GetWithDefault("mass", 1.0f);
+        var scale = m_ResetParams.GetWithDefault("scale", 3.0f); // 공 크기
+        ball.transform.localScale = new Vector3(scale, scale, scale);
+    }
+    ```
