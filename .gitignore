@@ -103,3 +103,42 @@ crashlytics-build.properties
 */[Aa]ssets/[Ss]treamingAssets/aa.meta
 */[Aa]ssets/[Ss]treamingAssets/aa/*
 /mlagent-env
+# /basics/Study_Unity_01/[Ll]ibrary/
+
+# 추가 해야함 ** 는 하위폴더 어디든지
+# Unity .gitignore 템플릿 (프로젝트 루트에 배치)
+
+# 자동으로 생성되며 용량이 큰 폴더 (버전 관리에서 제외)
+**/[Ll]ibrary/
+**/[Tt]emp/
+**/[Oo]bj/
+**/[Bb]uild/
+**/[Bb]uilds/
+**/[Ll]ogs/
+
+# 사용자 설정 (로컬 환경 설정이므로 제외)
+**/[Uu]ser[Ss]ettings/
+
+# 비주얼 스크립팅(Visual Scripting)에서 자동으로 생성되는 파일 (선택 사항)
+# Unity 버전에 따라 경로가 다를 수 있습니다.
+# Assets/Unity.VisualScripting.Generated/VisualScripting.Flow/UnitOptions.db
+# Assets/Unity.VisualScripting.Generated/VisualScripting.Flow/UnitOptions.db.meta
+# Assets/Unity.VisualScripting.Generated/
+
+# 기타 캐시/로그 파일
+*.log
+*.pdata
+*.pid
+
+# Rider/JetBrains 관련 파일 (Unity에서 주로 사용되는 IDE)
+.idea/
+
+# macOS 관련 파일
+.DS_Store
+
+# Windows 관련 파일
+Thumbs.db
+
+# 주소 지정 가능 에셋(Addressable Assets) 관련 파일 (빌드 시 생성)
+# /Assets/AddressableAssetsData/OSX/addressables_content_state.bin 등
+[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
