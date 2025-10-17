@@ -33,6 +33,10 @@
     - Pause : 게임 일시정지 (Ctrl + Shift + P)
     - Step : 1스텝 실행(Pause일 경우) (Ctrl + Alt + P)
 
+- 키보드 단축키
+
+    - F : 선택 오브젝트 포커스 인
+
 ### 서바이벌 FPS 클로닝
 
 1. 프로젝트 생성 후
@@ -92,6 +96,14 @@
     - Menu Window > Package Manager > 왼쪽 상단 + > Install package from disk...
     - com.unity.ml-agents / com.unity.ml-agents.extensions 의 package.json 파일 선택
     
+
+## 유니티 런
+- https://unity.com/kr/learn/get-started
+
+### 따라하기
+
+[링크](./unitylearn/README.md)
+
 
 ## 유니티 강화학습
 
