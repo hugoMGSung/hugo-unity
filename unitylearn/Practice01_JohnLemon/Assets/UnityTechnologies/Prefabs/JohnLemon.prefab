@@ -71,11 +71,11 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 100008, guid: b44f3940c4940544a8c2c6aee5fa086f,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: -1629726049364328320}
+      addedObject: {fileID: 7019255135158172420}
     - targetCorrespondingSourceObject: {fileID: 100008, guid: b44f3940c4940544a8c2c6aee5fa086f,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 7019255135158172420}
+      addedObject: {fileID: 5853707633212195554}
   m_SourcePrefab: {fileID: 100100000, guid: b44f3940c4940544a8c2c6aee5fa086f, type: 3}
 --- !u!1 &392583646194553019 stripped
 GameObject:
@@ -105,13 +105,26 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!136 &-1629726049364328320
-CapsuleCollider:
+--- !u!114 &7019255135158172420
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 392583646194553019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccef6898366af1f4d935954d1d78e8e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  turnSpeed: 20
+--- !u!65 &5853707633212195554
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -128,21 +141,6 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.32461658
-  m_Height: 1.4075519
-  m_Direction: 1
-  m_Center: {x: 0, y: 0.67973083, z: -0.06101069}
---- !u!114 &7019255135158172420
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 392583646194553019}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ccef6898366af1f4d935954d1d78e8e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  turnSpeed: 20
+  serializedVersion: 3
+  m_Size: {x: 0.7478323, y: 1.3590647, z: 0.52971655}
+  m_Center: {x: -0.019939601, y: 0.6784182, z: 0.044475168}

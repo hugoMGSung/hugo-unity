@@ -185,7 +185,7 @@
 
 - Apply Root Motion, Use Gravity 체크 해제
 
-- Capsule Collider 추가
+- Capsule Collider 추가 [변경](#BoxCollider변경)
 
     ![alt text](image-20.png)
 
@@ -387,6 +387,10 @@
 
 ##### 환경 추가
 
+<p id="BoxCollider변경">
+  Capsule Collider를 Box Collider로 변경, 캐릭터 쓰러짐 현상
+</p>
+
 - 게임 레벨
     - Assets > Scenes 폴더 이동 MainScene 더블클릭 
     - Assets > Prefabs로 이동하여 Level Prefab을 선택
@@ -403,3 +407,117 @@
     ![alt text](image-26.png)
 
 - 환경 광원 설정
+    - 조명으로 분위기 변경
+    - 계층창에서 Directional Light 선택
+    - Color 프로퍼티 클릭
+        - Color 프로퍼티를 (225, 240, 250)으로 설정. 옅은 파란색
+        - Light 컴포넌트에서 Intensity 프로퍼티를 2
+        - Light 컴포넌트에서 Realtime Shadows 프로퍼티
+        - Resolution 프로퍼티를 Use Quality Settings에서 Very High Resolution으로 변경
+        - Realtime Shadows Bias와 Normal Bias 프로퍼티를 0.01로 설정
+        - Transform 컴포넌트에서 Rotation 프로퍼티를 (30, 20, 0)으로 설정
+
+    - 직접 조명 및 간접 조명이라는 2가지 조명을 통해 실제 빛의 속성을 시뮬레이션
+        - 메뉴 Window > Rendering > Lighting
+
+        ![alt text](image-27.png)
+
+        - Lighting Settings에서 New 클릭
+        - Realtime Lighting 섹션, Realtime Global Illumination 체크박스 선택 해제. Mixed Lighting 섹션 Baked Global Illumination 체크박스 선택
+        - Environment 섹션에서 Skybox Material 프로퍼티 Default-Skybox에서 None으로 변경
+        - Environment 섹션에서 Environment Lighting Source를 Gradient로 설정 
+
+        ![alt text](image-28.png)
+
+        - 이전까지 밝은 화면에서 어두운 화면으로 변경됨
+        - 그레디언트는 전체 씬을 감싸는 커다란 구체와 동일
+        - Sky(씬 위에서 내려오는 환경 광원) 컬러를 더 옅은 회색으로 설정 (170, 180, 200)
+        - Equator(지평선에서 씬 중앙으로 이동하는 광원) 컬러를 청회색으로 설정 (90, 110, 130)
+        - Ground(씬 아래에서 올라오는 광원) 컬러를 검정색으로 설정 (0, 0, 0)
+
+##### 내비게이션 메시
+- 유령이 돌아다닐 수 있도록 하기 위해 내비메시(NavMesh, 내비게이션 메시)라는 빌트인 시스템을 이용
+- 내비메시는 보이지 않는 셰이프로, 선택한 게임 오브젝트가 이동할 수 있는 영역을 정의
+- 게임 오브젝트가 `정적(static)`으로 지정되어 있으면 Unity의 내비게이션 시스템은 해당 게임 오브젝트가 이동하지 않을 것으로 추정
+
+- 계층구조에서 Level 오브젝트 선택
+
+    ![alt text](image-29.png)
+
+    - Static 체크박스 체크
+
+    ![alt text](image-30.png)
+
+    - 모든 자식 오브젝트에도 정적 플래그를 활성화할 것인지 묻는 대화창. Yes... 선택
+
+- 이제 Level 게임 오브젝트와 모든 자식 게임 오브젝트가 정적으로 표시되었는데, 한 가지 예외를 설정해야 함. 레벨 디자인에는 그림자를 드리우는 데 사용되는 Ceiling Plane 게임 오브젝트. 이 게임 오브젝트를 베이크에 포함시키면 유령이 천장에서 걸어 다니게 됨. 
+
+    - Level > Corridors > Dressing > Ceiling Plane으로 이동하여 Ceiling Plane 게임 오브젝트를 선택
+    - 인스펙터에서 Static 체크박스를 선택 해제
+
+- 네비메시 생성
+    - 베이킹 - 네비메시 생성하는 과정을 뜻하는 용어
+    - Window > AI > Navigation 선택
+
+    ![alt text](image-31.png)
+
+    - Unity 6.0에서는 Bake 기능이 사라짐. 대신 NavMesh Surface라는 컴포넌트를 통해 베이크를 직접 제어로 변경
+
+    - Agent Ghost 추가
+    - Level > Corridors > Dressing > FloorPlane 선택 Inspector에 `NavMeshSurface` 컴포넌트 추가
+    
+    ![alt text](image-32.png)
+
+    - Bake 버튼 클릭
+
+    ![alt text](image-34.png)
+
+    - Bake 전
+
+    ![alt text](image-33.png)
+
+    - Bake 후
+
+    - 유령(적)이 돌아다닐 수 있는 네비게이션을 베이크
+
+##### 카메라와 포스트 프로세싱
+
+- Camera 컴포넌트 : 카메라 설정을 조정하여 캐릭터가 카메라 밖으로 벗어나지 않도록
+
+    - 카메라 컴포넌트도 이전 버전과 프로퍼티가 많이 변경됨
+
+    ![alt text](image-35.png)
+
+- 시네머신
+    - 씬에서 하나 이상의 가상 카메라를 생성
+    - Cinemachine Brain 컴포넌트에서 관리
+    - Cinemachine Brain 컴포넌트는 Camera 컴포넌트가 포함된 게임 오브젝트에 연결되며, 기본적으로 이는 Main Camera 게임 오브젝트가 됨
+    - Cinemachine Brain에서 모든 가상 카메라를 관리하며 실제 카메라가 어떤 가상 카메라(혹은 가상 카메라의 조합)를 따라야 하는지를 결정
+
+    - JohnLemon 오브젝트 선택 후 마우스오른쪽 버튼 컨텍스트 메뉴에서 Cinemachine > Virtual Camera 선택
+
+    ![alt text](image-36.png)
+
+    - Aim 섹션 Composer에서 Do Nothing 으로
+    - Follow JohnLemon 오브젝트 드래그
+    - Body 섹션에서 오른쪽 상단의 드롭다운을 Transposer에서 Framing Transposer로 변경
+
+    ![alt text](image-37.png)
+
+    - Virtual Camera Transform의 Rotation Y를 0으로 변경
+    - Body > Camera Distance 를 10에서 4로 변경
+
+    ![alt text](image-38.png)
+
+    - 플레이 화면
+
+    ![alt text](image-39.png)
+
+
+##### 시점에 따른 캐릭터 이동 변경
+
+- 가상 카메라 시점에 맞춰 캐릭터 이동 변경 스크립트
+
+    ```cs
+    
+    ```
