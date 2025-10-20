@@ -749,4 +749,9 @@
     - 계층 구조에서 FaderCanvas > ExitImageBackground 를 Game Ending 컴포넌트의 Exit Background Image Canvas Group 필드로 드래그
 
 
+- 실행결과
+
+    https://github.com/user-attachments/assets/8a817fc5-16c7-4e5d-836e-ebee3fab8294
+
+
     
