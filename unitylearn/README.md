@@ -591,3 +591,162 @@
 
   https://github.com/user-attachments/assets/ff9fb85d-9aa9-4960-b19f-8a680f87beb9
 
+
+
+##### 카메라 포스트 프로세싱(나중에 다시)
+
+- 사진에 필터를 적용하듯이 게임 이미지를 화면에 렌더링하기 전에 필터 및 효과를 적용하는 작업
+- 인스펙터 게임 오브젝트 Layer 프로퍼티 
+- Add Layer : 32개의 레이어 존재
+
+    ![alt text](image-40.png)
+
+- "PostProcessingVolumes"를 User Layer 8 추가
+- Post Process Layer 컴포넌트를 Main Camera에 추가
+
+##### 안티앨리어싱 이미지 품질 개선
+- Post Process Layer 컴포넌트에서 Mode 프로퍼티 드롭다운을 No Anti-aliasing에서 Fast Approximate Anti-aliasing(FXAA)으로 변경
+- 드롭다운 아래의 Fast Mode 체크박스를 활성화
+
+- 포스트 프로세싱 볼륨
+    - 계층 창에서 Create > Create Empty
+    - 새 게임 오브젝트의 이름을 “GlobalPost”로 지정
+    - Is Global 체크박스를 활성화
+    - 인스펙터에서 레이어를 PostProcessingVolumes로 설정
+    - Transform 컴포넌트의 Position 프로퍼티를 (0, 0, 0)으로 변경. 이 게임 오브젝트가 글로벌 포스트 프로세스 볼륨이 됨
+    - GlobalPost에 Post Process Volume 컴포넌트를 추가
+
+    ![alt text](image-41.png)
+
+- 컬러 그레이딩 효과 추가
+    - Post-process Volume 맨 아래의 Add effect 클릭
+    - Unity > color grading 선택
+
+    ![alt text](image-42.png)
+
+
+
+##### UI 설정
+
+- 게임을 페이드아웃하려면 Unity의 UI(사용자 인터페이스) 시스템을 사용
+    - 계층 창에서 +(Create) > UI > Image 선택
+
+    ![alt text](image-43.png)
+
+    - Canvas 게임 오브젝트를 선택. F키로 포커스 온
+
+    ![alt text](image-44.png)
+
+    - 계층 구조에서 EventSystem 게임 오브젝트를 선택(상호작용을 위한 오브젝트) 후 삭제
+
+- 캔버스 설정
+    - Canvas의 이름을 FaderCanvas로 변경
+
+    ![alt text](image-45.png)
+
+    - Render Mode 설정
+        - **Screen Space - Overlay**: 캔버스가 화면을 채우고 캔버스의 모든 UI 요소가 모든 항목 위에 렌더링되는 모드
+        - Screen Space - Camera: 캔버스가 화면을 채우지만, 특정 카메라로 렌더링되고 카메라의 거리에 영향을 받는 모드
+        - World Space: 씬에 UI가 있으며 다른 오브젝트의 앞이나 뒤에 렌더링되는 모드(예: 3D 월드에서 캐릭터 위에 표시되는 이름 태그)
+
+    -  Canvas Scaler 컴포넌트를 이용하면 다양한 크기의 화면에서 UI 요소의 상대적인 크기를 조정 가능 - 현재는 필요없어 삭제
+    - Graphic Raycaster 컴포넌트는 클릭과 같은 UI 이벤트를 감지, 역시 필요없음. 삭제
+
+- 이미지 늘리기
+    - 계층 구조의 Image 선택, 크기 및 위치 변경
+    - Image 객체, Image 프로퍼티 Color 선택 후 검정으로 변경
+
+    ![alt text](image-46.png)
+
+- 미션 완료 이미지 추가
+
+    - 계층 구조에서 현재 Image 게임 오브젝트의 이름을 ExitImageBackground로 변경
+    - 하위에 이미지 오브잭트 ExitImage 추가
+    - Source Image 프로퍼티의 동그란 선택 버튼을 클릭, Won 선택
+
+    ![alt text](image-47.png)
+
+    - Rect Transform 컴포넌트를 찾습니다. Anchors 설정을 펼치기
+    - x 및 y의 최솟값을 0으로 설정하고, x 및 y의 최댓값을 1로 설정
+    - Left, Right, Top 및 Bottom 프로퍼티를 0으로 설정
+    - Image Type 프로퍼티, Preserve Aspect 체크박스를 활성화
+
+- Canvas Group 컴포넌트 추가
+    - UI 요소를 원하는 때에 페이드인 및 페이드아웃하도록 
+    - ExitImageBackground 게임 오브젝트 선택
+    - 인스펙터에서 Canvas Group 컴포넌트를 추가
+    - Alpha 1 -> 0으로 변경
+
+    - JohnLemon 오브젝트 클릭후 F
+
+- GameEnding 트리거 생성
+    - JohnLemon이 유령의 집에서 탈출했는지 여부를 인식하여 Canvas Group의 Alpha 프로퍼티 값을 언제 변경할지 파악
+    - Trigger : 트리거는 이동을 방해하지 않는 콜라이더
+    - 계층 창에서 Create 메뉴를 클릭하고 Create Empty를 선택 > GameEnding 이름 변경
+    - IsTrigger 체크
+    - GameEnding 트랜스폼의 Position을 (18, 1, 1.5)로 설정
+    - Box Collider 컴포넌트를 추가
+
+    ![alt text](image-48.png)
+
+    - C# 스크립트 생성
+
+    ```cs
+    public class GameEnding : MonoBehaviour
+    {
+        public float fadeDuration = 1f;  // 페이드아웃 간격
+        public GameObject player;  // 트리거가 발생할 오브젝트
+        public float displayImageDuration = 1f;
+        public CanvasGroup exitBackgroundImageCanvasGroup;
+
+        bool m_IsPlayerAtExit;
+        float m_Timer;
+
+        // Start is called before the first frame update
+        void Start()
+        {
+            
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+            if (m_IsPlayerAtExit)  // 플레이어가 트리거 영역에 들어왔는지 확인
+            {
+                EndLevel();
+            }
+        }
+
+        private void EndLevel()
+        {
+            m_Timer += Time.deltaTime;  // 경과 시간 누적
+
+            exitBackgroundImageCanvasGroup.alpha = m_Timer / fadeDuration;  // 페이드아웃 효과 적용
+
+            if (m_Timer > fadeDuration + displayImageDuration)
+            {
+                Application.Quit();  // 게임 종료
+            }
+        }
+
+        // 이 클래스는 먼저 플레이어가 제어하는 게임 오브젝트를 감지해야 함
+        void OnTriggerEnter(Collider other)
+        {
+            if (other.gameObject == player)  // 트리거 영역에 플레이어가 들어왔는지 확인
+            {
+                m_IsPlayerAtExit = true; // 트리거 상태 설정
+            }
+        }
+    }
+    ```
+
+- GameEnding 스크립트에 대한 변수 설정
+
+    - 계층 구조에서 GameEnding 게임 오브젝트를 선택
+
+    ![alt text](image-49.png)
+
+    - 계층 구조에서 FaderCanvas > ExitImageBackground 를 Game Ending 컴포넌트의 Exit Background Image Canvas Group 필드로 드래그
+
+
+    
