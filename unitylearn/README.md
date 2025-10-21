@@ -749,9 +749,6 @@
     - 계층 구조에서 FaderCanvas > ExitImageBackground 를 Game Ending 컴포넌트의 Exit Background Image Canvas Group 필드로 드래그
 
 
-<<<<<<< Updated upstream
-=======
-<<<<<<< HEAD
 ##### 적 캐릭터 생성, 정적 관찰자
 
 - 가고일 프리팹
@@ -957,16 +954,7 @@
 
 - 실행결과
 
-    
-=======
->>>>>>> Stashed changes
 - 실행결과
 
     https://github.com/user-attachments/assets/8a817fc5-16c7-4e5d-836e-ebee3fab8294
 
-
-    
-<<<<<<< Updated upstream
-=======
->>>>>>> 573cbc662ee09797e4dae810bc6388dc3f088d03
->>>>>>> Stashed changes
