@@ -749,9 +749,224 @@
     - 계층 구조에서 FaderCanvas > ExitImageBackground 를 Game Ending 컴포넌트의 Exit Background Image Canvas Group 필드로 드래그
 
 
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+##### 적 캐릭터 생성, 정적 관찰자
+
+- 가고일 프리팹
+    - 프로젝트 창에서 Assets > Models 폴더로 이동하여 Gargoyle 에셋 확인, 계츷창으로 드래그
+    - 모델은 읽기 전용이기 때문에 프리팹을 생성한 후 변경
+
+    ![alt text](image-50.png)
+
+- 가고일 애니메이션화
+    - 프로젝트 창에서 Assets > Animation > Animators 폴더로 이동하여 오른쪽 클릭
+    - 컨텍스트 메뉴에서 Create > Animator Controller를 선택. 새로운 애니메이션 컨트롤러의 이름을 `Gargoyle`로 설정
+    - Gargoyle을 더블 클릭하여 Animator 창 오픈
+    - 프로젝트 창에서 Assets > Animation > Animations로 이동
+    - Idle 애니메이션을 프로젝트 창에서 Animator 창으로 드래그. 애니메이터의 Idle 상태가 생성
+
+    ![alt text](image-51.png)
+
+    - 실행후 애니메이션 확인
+
+    ![alt text](image-52.png)
+
+- 가고일에 콜라이더 추가
+
+    - 플레이어가 가고일과 부딪히고, 또 가고일이 손전등 불빛으로 JohnLemon을 볼 수 있도록
+
+    - 인스펙터에서 Gargoyle 게임 오브젝트에 Capsule Collider 컴포넌트를 추가
+
+    ![alt text](image-53.png)
+
+    - Capsule Collider의 Center 프로퍼티를 (0, 0.9, 0)으로 변경
+    - Radius 프로퍼티를 0.3으로 변경
+    - Height 프로퍼티를 1.8로 변경
+
+- 가고일 가시선 시뮬레이션을 위한 트리거 생성
+
+    - 트리거를 생성한 후 가고일이 벽 너머를 보지 못하도록 하는 커스텀 스크립트를 작성
+    - 계층 창에서 Gargoyle 게임 오브젝트를 오른쪽 클릭하고 Create Empty를 선택 
+    - `PointOfView` 로 이름 설정
+    - Position 프로퍼티를 (0, 1.4, 0.4)로 변경
+    - Rotation 프로퍼티를 (20, 0, 0)으로 변경
+    - PointOfView Global -> Local로 변경
+
+    ![alt text](image-54.png)
+
+    - 가고일 시점에 트리거를 추가
+    - PointOfView 인스펙터에서 Capsule Collider 컴포넌트를 추가
+    - 컴포넌트의 Is Trigger 체크박스를 활성화
+    - Capsule Collider의 Center 프로퍼티를 (0, 0, 0.95)로 변경
+    - Radius 프로퍼티를 0.7로 변경
+    - Height 프로퍼티를 2로 변경
+    - Direction 프로퍼티를 Y-Axis에서 Z-Axis
+ 로 변경
+
+    ![alt text](image-55.png)
+
+- 커스텀 Observer 스크립트 작성
+
+    - JohnLemon이 트리거 영역으로 걸어 들어갔을 때 벌어질 일에 대한 스크립트를 작성
+    - 프로젝트 창에서 Assets > Scripts로 이동
+    - Scripts 폴더를 오른쪽 클릭하고 Create > C# Script를 선택. 새로운 스크립트의 이름을 `Observer`로 설정
+
+    ![alt text](image-56.png)
+
+    - 적의 가시선 확인 추가
+
+    ```cs
+    public class Observer : MonoBehaviour
+    {
+        public Transform player;  // 플레이어의 Transform 참조
+        public GameEnding gameEnding; // GameEnding 스크립트 참조
+
+        bool m_IsPlayerInRange;   // 플레이어가 트리거 영역에 있는지 여부
+
+        void OnTriggerEnter(Collider other)
+        {
+            if (other.transform == player)
+            {
+                m_IsPlayerInRange = true;   // 플레이어가 트리거 영역에 들어옴
+            }
+        }
+
+        void OnTriggerExit(Collider other)
+        {
+            if (other.transform == player)
+            {
+                m_IsPlayerInRange = false;      //  플레이어가 트리거 영역에서 나감
+            }
+        }
+
+        void Update()
+        {
+            if (m_IsPlayerInRange)  // 플레이어가 트리거 영역에 있을 때
+            {
+                // 플레이어와 관찰자 사이에 장애물이 있는지 확인
+                Vector3 direction = player.position - transform.position + Vector3.up;
+                Ray ray = new Ray(transform.position, direction);
+                RaycastHit raycastHit;
+
+                // 레이캐스트가 플레이어에 닿는지 확인
+                if (Physics.Raycast(ray, out raycastHit))
+                {
+                    if (raycastHit.collider.transform == player)  // 장애물이 없으면
+                    {
+                        gameEnding.CaughtPlayer();
+                    }
+                }
+            }
+        }
+    }
+    ```
+
+- GameEnding 스크립트 수정
+
+    - 플레이어가 적에게 잡힐 때 게임을 종료하는 대신 레벨을 재시작할 수 있도록 스크립트를 수정
+
+    ```cs
+    public class GameEnding : MonoBehaviour
+    {
+        public float fadeDuration = 1f;  // 페이드아웃 간격
+        public float displayImageDuration = 1f;   // 이미지 표시 시간
+        public GameObject player;  // 트리거가 발생할 오브젝트
+
+        public CanvasGroup exitBackgroundImageCanvasGroup;   // 페이드아웃에 사용할 캔버스 그룹
+        public CanvasGroup caughtBackgroundImageCanvasGroup;    // 잡혔을 때 사용할 캔버스 그룹
+
+        bool m_IsPlayerAtExit;  // 플레이어가 트리거 영역에 있는지 여부
+        bool m_IsPlayerCaught;  // 플레이어가 잡혔는지 여부
+        float m_Timer;    // 경과 시간
+
+        // 이 클래스는 먼저 플레이어가 제어하는 게임 오브젝트를 감지해야 함
+        void OnTriggerEnter(Collider other)
+        {
+            if (other.gameObject == player)  // 트리거 영역에 플레이어가 들어왔는지 확인
+            {
+                m_IsPlayerAtExit = true; // 트리거 상태 설정
+            }
+        }
+
+        // 플레이어가 잡혔을 때 호출되는 메서드
+        public void CaughtPlayer()
+        {
+            m_IsPlayerCaught = true;
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+            if (m_IsPlayerAtExit)  // 플레이어가 트리거 영역에 들어왔는지 확인
+            {
+                EndLevel(exitBackgroundImageCanvasGroup, false);
+            }
+            else if (m_IsPlayerCaught)  // 플레이어가 잡혔는지 확인
+            {
+                EndLevel(caughtBackgroundImageCanvasGroup, true);
+            }
+        }
+
+        // 레벨 종료 처리
+        void EndLevel(CanvasGroup imageCanvasGroup, bool doRestart)
+        {
+            m_Timer += Time.deltaTime;  // 경과 시간 누적
+            imageCanvasGroup.alpha = m_Timer / fadeDuration;  // 페이드아웃 효과 적용
+
+            if (m_Timer > fadeDuration + displayImageDuration) // 지정된 시간이 지나면
+            {
+                if (doRestart)  // 재시작 여부에 따라
+                {
+                    SceneManager.LoadScene(0); // 첫 번째 씬(인덱스 0)으로 재시작
+                }
+                else
+                {
+                    Application.Quit();  // 애플리케이션 종료
+                }
+            }
+        }
+    }
+    ```
+
+- 가고일 프리팹 완성
+
+    - Observer 스크립트 작업
+        - 플레이어 캐릭터가 트리거에 있는 시점을 파악
+        - 레이캐스트를 사용하여 콜라이더에 부딪혔는지 체크
+        - 콜라이더가 플레이어 캐릭터인지 여부를 식별
+
+    - Observer 스크립트를 저장하고 Unity로 복귀
+    - 가고일 프리팹 인스턴스는 이후에 더 추가할 수 있으며, 지금은 가지고 있는 프리팹을 제일 처음 방의 구석에 배치
+    - Position 프로퍼티를 (-15.2, 0, 0.8)로 변경
+    - Rotation 프로퍼티를 (0, 135, 0)으로 변경
+    - 계층 창에 있는 JohnLemon 게임 오브젝트를 인스펙터 내 Observer 스크립트의 Player 필드로 드래그
+
+    ![alt text](image-57.png)
+
+    - 계층 창에서 FaderCanvas 게임 오브젝트
+    - ExitImageBackground 게임 오브젝트를 오른쪽 클릭하고 컨텍스트 메뉴에서 Duplicate를 선택
+    - 새로운 복사본의 이름을 CaughtImageBackground로 변경
+    - ExitImage 게임 오브젝트의 이름을 CaughtImage로 변경
+    - Image 컴포넌트에서 Source Image 프로퍼티 옆의 원형 선택 버튼을 클릭합니다. 대화창이 열리면 Caught라는 스프라이트를 선택
+    - Game Ending 스크립트의 Caught Background Image Canvas Group에 레퍼런스를 할당필요. 계층 창에서 GameEnding 게임 오브젝트를 선택
+    - CaughtImageBackground 게임 오브젝트를 인스펙터 내 Game Ending 컴포넌트의 Caught Background Image Canvas Group 필드로 드래그
+
+    ![alt text](image-58.png)
+
+- 실행결과
+
+    
+=======
+>>>>>>> Stashed changes
 - 실행결과
 
     https://github.com/user-attachments/assets/8a817fc5-16c7-4e5d-836e-ebee3fab8294
 
 
     
+<<<<<<< Updated upstream
+=======
+>>>>>>> 573cbc662ee09797e4dae810bc6388dc3f088d03
+>>>>>>> Stashed changes
