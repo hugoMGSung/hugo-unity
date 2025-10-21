@@ -753,7 +753,7 @@
     https://github.com/user-attachments/assets/8a817fc5-16c7-4e5d-836e-ebee3fab8294
 
 
-##### 적 캐릭터 생성, 정적 관찰자
+##### 적 캐릭터 생성, 정적 가고일
 
 - 가고일 프리팹
     - 프로젝트 창에서 Assets > Models 폴더로 이동하여 Gargoyle 에셋 확인, 계츷창으로 드래그
@@ -962,3 +962,119 @@
 
 
 
+##### 적 캐릭터 생성, 동적 유령
+
+- 유령 프리팹 설정
+
+    - 프로젝트 창에서 Assets > Models > Characters 폴더를 열고 Ghost 에셋 확인
+    - Ghost 계층창에 드래그 후 프리팹에 드래그
+
+- 유령 애니메이션화
+    - 프로젝트 창에서 Assets > Animation > Animators 폴더로 이동하여 오른쪽 클릭
+    - Create > Animator Controller를 선택 `Ghost`
+    - Ghost 컨트롤러 더블클릭
+    - Assets > Animation > Animations로 이동
+    - Ghost@Walk 모델 에셋을 펼치기
+    - Walk 애니메이션을 프로젝트 창에서 Animator 창으로 드래그
+
+    ![alt text](image-59.png)
+
+    - Assets > Animation > Animators 폴더로 이동
+    - 계층 창에서 Ghost 게임 오브젝트를 선택
+    - 프로젝트 창에 있는 Ghost Animator 컨트롤러를 인스펙터 내 Ghost Animator 컴포넌트의 Controller 프로퍼티로 드래그
+
+    ![alt text](image-60.png)
+
+- 유령에 콜라이더 추가
+
+    - 프리팹모드로 Capsule Collider 추가
+    - 인스펙터에서 Ghost 게임 오브젝트에 Capsule Collider 컴포넌트를 추가
+    - Capsule Collider의 Center 프로퍼티를 (0, 0.6, 0)으로 변경
+    - Radius 프로퍼티를 0.25로 변경
+    - Height 프로퍼티를 1.2로 변경
+
+- 유령 게임 오브젝트에 Rigidbody 컴포넌트 추가
+
+    - 유령은 JohnLemon과 충돌해도 그로 인해 움직이지 않아야 함
+    - 리지드바디를 키네마틱으로 설정 - 위치와 회전에 대한 모든 제한 조건 활성화
+    - 인스펙터에서 Rigidbody 컴포넌트를 찾아 Is Kinematic 체크박스를 활성화
+
+- 가시점 오브젝트 프리팹
+    
+    - PointOfView 게임 오브젝트를 계층 창에서 프로젝트 창의 Assets > Prefabs 폴더로 드래그
+    - PointOfView 프리팹화 후 아이콘 모양 변경
+
+    ![alt text](image-61.png)
+
+    - 프로젝트 창에서 Assets > Prefabs로 이동하고 Ghost 프리팹을 선택
+    - PointOfView 프리팹을 Assets > Prefabs 폴더에서 계층 창의 Ghost 게임 오브젝트로 드래그
+    - 계층 창에서 PointOfView 게임 오브젝트를 선택
+    - Position 프로퍼티를 (0, 0.75, 0.4)로 변경
+    - Rotation 프로퍼티를 (0, 0, 0)으로 변경
+
+    ![alt text](image-62.png)
+
+- Nav Mesh Agent 컴포넌트 설정
+
+    - 유령이 게임 환경을 돌아다닐 수 있도록 설정
+    - Nav Mesh Agent(환경 튜토리얼에서 베이크했던 내비 메시에서 유령이 경로를 찾도록 함)
+    - Nav Mesh Agent에 유령이 어디로 가야 하는지 알려 주는 스크립트
+    - 인스펙터에서 Ghost 게임 오브젝트에 Nav Mesh Agent 컴포넌트를 추가
+
+    ![alt text](image-63.png)
+
+    - 원통 생김
+    - Speed 프로퍼티를 1.5로 변경
+    - Stopping Distance 프로퍼티를 0.2로 변경
+
+- 새로운 WaypointPatrol 스크립트 생성
+
+    -Scripts 폴더를 오른쪽 클릭하고 Create > C# Script를 선택. 새로운 스크립트의 이름을 `WaypointPatrol`로 설정
+
+    - 계층 구조에서 Ghost 게임 오브젝트를 선택
+    - WaypointPatrol 스크립트를 더블 클릭
+
+    ```cs
+    public class WaypointPatrol : MonoBehaviour
+    {
+        public NavMeshAgent navMeshAgent;   // NavMeshAgent 게임 오브젝트 참조
+        public Transform[] waypoints;       // 순찰할 웨이포인트 배열
+
+        int m_CurrentWaypointIndex;         // 현재 웨이포인트 인덱스
+
+        // 초기화 함수
+        void Start()
+        {
+            // 첫 번째 웨이포인트로 이동 시작
+            navMeshAgent.SetDestination(waypoints[0].position);
+        }
+
+        // 매 프레임 호출되는 업데이트 함수
+        void Update()
+        {
+            // 현재 웨이포인트에 도착했는지 확인
+            if (navMeshAgent.remainingDistance < navMeshAgent.stoppingDistance)
+            {
+                // 다음 웨이포인트로 이동
+                m_CurrentWaypointIndex = (m_CurrentWaypointIndex + 1) % waypoints.Length;
+                // 다음 웨이포인트로 목적지 설정
+                navMeshAgent.SetDestination(waypoints[m_CurrentWaypointIndex].position);
+            }
+        }
+    }
+    ```
+
+- 내비 메시 에이전트 레퍼런스를 유령 프리팹에 할당
+
+    - 계층 창에서 Ghost 게임 오브젝트를 선택
+    - 인스펙터 창에서 Nav Mesh Agent 컴포넌트의 이름을 Waypoint Patrol 스크립트의 Nav Mesh Agent 필드로 드래그
+
+    ![alt text](image-65.png)
+
+    - Ghost 게임 오브젝트를 펼치고 PointOfView 자식 게임 오브젝트를 선택
+    - 계층 창에서 JohnLemon 게임 오브젝트를 Observer 스크립트의 Player 필드로 드래그하여 Transform을 할당
+    - 다음으로 원형 선택 버튼을 클릭하고 GameEnding 필드를 할당
+
+- 씬에 유령배치
+
+    - 
