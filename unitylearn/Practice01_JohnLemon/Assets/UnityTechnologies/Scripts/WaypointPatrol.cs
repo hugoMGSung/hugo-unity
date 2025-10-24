@@ -1,32 +1,82 @@
-using System.Collections;
-using System.Collections.Generic;
+ï»¿using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class WaypointPatrol : MonoBehaviour
 {
-    public NavMeshAgent navMeshAgent;   // NavMeshAgent °ÔÀÓ ¿ÀºêÁ§Æ® ÂüÁ¶
-    public Transform[] waypoints;       // ¼øÂûÇÒ ¿şÀÌÆ÷ÀÎÆ® ¹è¿­
+    public NavMeshAgent navMeshAgent;    // NavMeshAgent ì°¸ì¡°
+    public Transform[] waypoints;        // ìˆœì°° ì›¨ì´í¬ì¸íŠ¸ë“¤
 
-    int m_CurrentWaypointIndex;         // ÇöÀç ¿şÀÌÆ÷ÀÎÆ® ÀÎµ¦½º
+    int m_CurrentWaypointIndex = 0;
 
-    // ÃÊ±âÈ­ ÇÔ¼ö
-    void Start()
+    void Awake()
     {
-        // Ã¹ ¹øÂ° ¿şÀÌÆ÷ÀÎÆ®·Î ÀÌµ¿ ½ÃÀÛ
-        navMeshAgent.SetDestination(waypoints[0].position);
+        // ì¸ìŠ¤í™í„°ì—ì„œ ë¹„ì›Œë‘ë©´ ìë™ í• ë‹¹
+        if (navMeshAgent == null)
+            navMeshAgent = GetComponent<NavMeshAgent>();
     }
 
-    // ¸Å ÇÁ·¹ÀÓ È£ÃâµÇ´Â ¾÷µ¥ÀÌÆ® ÇÔ¼ö
+    IEnumerator Start()
+    {
+        // ì›¨ì´í¬ì¸íŠ¸ ì—†ìœ¼ë©´ ë” ì§„í–‰í•˜ì§€ ì•ŠìŒ
+        if (waypoints == null || waypoints.Length == 0)
+        {
+            Debug.LogWarning("[WaypointPatrol] waypoints ê°€ ë¹„ì–´ìˆì–´ìš”.");
+            yield break;
+        }
+
+        // NavMesh ìœ„ì— ì•ˆì „í•˜ê²Œ ì˜¬ë ¤ë†“ê¸° (ì˜¤í”„ë©”ì‹œì— ìŠ¤í°ë˜ëŠ” ê²½ìš° ëŒ€ë¹„)
+        if (!navMeshAgent.isOnNavMesh)
+        {
+            if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 2f, NavMesh.AllAreas))
+            {
+                // í˜„ì¬ ìœ„ì¹˜ ê·¼ì²˜ì˜ NavMesh ì§€ì ìœ¼ë¡œ ì›Œí”„
+                navMeshAgent.Warp(hit.position);
+            }
+            else
+            {
+                Debug.LogError("[WaypointPatrol] í˜„ì¬ ìœ„ì¹˜ ê·¼ì²˜ì— NavMeshê°€ ì—†ì–´ìš”. NavMeshë¥¼ Bakeí–ˆëŠ”ì§€/Agentê°€ ë‹¿ì•„ìˆëŠ”ì§€ í™•ì¸!");
+                yield break;
+            }
+        }
+
+        // ì²« ëª©ì ì§€ ì„¤ì • (ì›¨ì´í¬ì¸íŠ¸ ìœ„ì¹˜ë„ NavMeshì— ìŠ¤ëƒ…)
+        SetDestinationSafe(waypoints[m_CurrentWaypointIndex].position);
+
+        // ì²« ê²½ë¡œ ê³„ì‚° ì™„ë£Œë  ë•Œê¹Œì§€ í•œ í”„ë ˆì„ ì´ìƒ ëŒ€ê¸°
+        while (navMeshAgent.pathPending)
+            yield return null;
+    }
+
     void Update()
     {
-        // ÇöÀç ¿şÀÌÆ÷ÀÎÆ®¿¡ µµÂøÇß´ÂÁö È®ÀÎ
-        if (navMeshAgent.remainingDistance < navMeshAgent.stoppingDistance)
+        // ì—ì´ì „íŠ¸ ìƒíƒœ ì²´í¬: NavMesh ìœ„ê°€ ì•„ë‹ˆë©´ ì ‘ê·¼ ê¸ˆì§€
+        if (navMeshAgent == null || !navMeshAgent.enabled || !navMeshAgent.isOnNavMesh)
+            return;
+
+        // ê²½ë¡œ ê³„ì‚° ì¤‘ì´ë©´ ì•„ì§ remainingDistance ë³´ì§€ ì•ŠìŒ
+        if (navMeshAgent.pathPending)
+            return;
+
+        // ë„ì°© íŒì •: ë‚¨ì€ ê±°ë¦¬ <= ì •ì§€ê±°ë¦¬ && (ê²½ë¡œ ì—†ìŒ or ê±°ì˜ ì •ì§€)
+        if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance &&
+            (!navMeshAgent.hasPath || navMeshAgent.velocity.sqrMagnitude < 0.01f))
         {
-            // ´ÙÀ½ ¿şÀÌÆ÷ÀÎÆ®·Î ÀÌµ¿
             m_CurrentWaypointIndex = (m_CurrentWaypointIndex + 1) % waypoints.Length;
-            // ´ÙÀ½ ¿şÀÌÆ÷ÀÎÆ®·Î ¸ñÀûÁö ¼³Á¤
-            navMeshAgent.SetDestination(waypoints[m_CurrentWaypointIndex].position);
+            SetDestinationSafe(waypoints[m_CurrentWaypointIndex].position);
+        }
+    }
+
+    void SetDestinationSafe(Vector3 targetPos)
+    {
+        // ì›¨ì´í¬ì¸íŠ¸ê°€ ë©”ì‰¬ ë°–ì— ìˆìœ¼ë©´ ê°€ì¥ ê°€ê¹Œìš´ NavMesh ì ìœ¼ë¡œ ë³´ì •
+        if (NavMesh.SamplePosition(targetPos, out NavMeshHit hit, 2f, NavMesh.AllAreas))
+        {
+            navMeshAgent.SetDestination(hit.position);
+        }
+        else
+        {
+            Debug.LogWarning($"[WaypointPatrol] ì›¨ì´í¬ì¸íŠ¸ {m_CurrentWaypointIndex}ê°€ NavMesh ë°”ê¹¥ì´ì—ìš”. ë°˜ê²½ 2m ë‚´ ëŒ€ì²´ ì§€ì ì´ ì—†ìŒ.");
         }
     }
 }

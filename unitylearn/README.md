@@ -962,7 +962,7 @@
 
 
 
-##### 적 캐릭터 생성, 동적 유령
+##### 적 캐릭터 생성, 동적 유령 1
 
 - 유령 프리팹 설정
 
@@ -1081,3 +1081,79 @@
     - 4개가 되도록 Ctrl+D
     - 첫 번째 유령은 JohnLemon이 시작하는 방 주변에 배치. 인스펙터에서 이름이 Ghost인 유령의 Position을 (-5.3, 0, -3.1)로 설정
     - 두 번째 유령 Position을 (1.5, 0, 4)로 설정
+    - 세 번째 유령은 식당에 있는 테이블 하나의 주변. Position을 (3.2, 0, 6.5)로 설정
+    - 네 번재 유령의 Position을 (7.4, 0, -3)으로 설정
+    - 이제 웨이포인트를 만들고 위치를 지정 
+
+- 유령 웨이포인트 생성 및 위치 지정
+
+    - 웨이포인트는 빈 게임 오브젝트. 모든 게임 오브젝트에는 트랜스폼이 있으므로 빈 오브젝트의 Transform 컴포넌트만 사용할 예정
+    - 계층 창에서 Create 버튼을 클릭하고 Create Empty를 선택
+    - 새로 생성된 빈 게임 오브젝트의 이름을 “Waypoint”로 변경, Waypoint 게임 오브젝트 10개 복사
+    - Ghost 게임 오브젝트 선택
+    - 인스펙터에서 Waypoint Patrol Component가 보일 때까지 스크롤 다운
+
+    ![alt text](image-66.png)
+
+    - Waypoint1과 Waypoint2 를 Ghost1에 연결
+    - Waypoint1의 Position을 (-5.3, 0, 6.7)로 설정
+    - Waypoint2의 Position을 (-5.5, 0, -4.5)로 설정
+
+##### 문제점
+- Navigation bake 기능이 obsolete로 변경
+- Window > AI > Navigation(Obsolete) 에는 Bake가 존재
+
+    ![alt text](image-67.png)
+
+- Window > AI > Navigation  
+
+    ![alt text](image-68.png)
+
+
+- 이 아래는 다시!!!
+- ~~문제 해결방법 : NavMeshSurface 최적 세팅~~
+    - NavMeshSurface_Ghost 빈 오브젝트 생성
+    - NavMeshSurface 컴포넌트 추가
+    - Agent Type: Ghost
+    - Collect Objects: All
+    - Include Layers: Ground, Static (너의 “바닥/걷는 면” 레이어만 체크) Default
+    - Use Geometry: 바닥에 Collider가 정확하면 Physics Colliders, 콜라이더가 부정확하고 렌더 메시가 정확하면 Render Meshes
+    - Default Area: Walkable
+    - Advanced(아래쪽 펼치기)
+        - Voxel Size: 기본값(Agent Type에 따라 자동). 미세조정 필요할 때만 0.05~0.1 근방으로 살짝.
+        - Tile Size: 기본값. 씬이 넓고 베이크가 느리면 64→128로 올려도 됨.
+        - Min Region Area: 2~8 사이 권장. 너무 작은 섬 메쉬 제거해서 경로 깔끔.
+        - Build Height Mesh: 체크(권장). 경사/계단 판정이 더 안정적임.
+        - Bake : Inspector의 Bake 버튼 클릭 → 씬에 파란 NavMesh 생기면 성공.
+
+
+- NavMeshAgent(캐릭터) 매칭
+    - Agent Type: 캐릭터의 NavMeshAgent는 타입 없이 동작하지만, 실제 베이크는 Surface의 Agent Type 기준이므로 반드시 Surface에서 Ghost로 베이크해야 isOnNavMesh가 true가 됨.
+    
+- 그냥 이전의 Window > AI > Navigation(Obsolete) 로 Bake후 추후 도모
+
+    ![alt text](image-69.png)
+
+    - 첫번째 유령 이동 확인
+
+##### 적 캐릭터 생성, 동적 유령 2 
+
+- Ghost_2에 Waypoint_3, Waypoint_4 할당
+    - Waypoint_3  Position을 (1.2, 0, 9.47)로 설정
+    - Waypoint_4  Position을 (0.9, 0, -3.5)로 설정
+
+- Ghost_3에 식당의 테이블 주위를 맴돌기 때문에 더 많은 웨이포인트가 필요
+    - Waypoint_5 ~ 8 까지 할당
+    - Waypoint_5 Position을 (3.2, 0, 5.6)
+    - Waypoint_6 Position을 (3.2, 0, 12.3)
+    - Waypoint_7 Position을 (6.5, 0, 12.3)
+    - Waypoint_8 Position을 (6.5, 0, 5.6)
+
+- Ghost_4 에 Waypoint_9와 Waypoint_10 할당
+    - Waypoint_9 Position을 (3.2, 0, -5)
+    - Waypoint_10 Position을 (7.4, 0, -2)
+
+
+- 실행화면
+
+    
