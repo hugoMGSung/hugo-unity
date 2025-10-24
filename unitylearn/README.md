@@ -1156,4 +1156,5 @@
 
 - 실행화면
 
-    
+    https://github.com/user-attachments/assets/38ca2f93-28d1-4533-865c-4a32d48dd488
+
