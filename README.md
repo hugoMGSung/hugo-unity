@@ -100,7 +100,7 @@
 ## 유니티 런
 - https://unity.com/kr/learn/get-started
 
-### 따라하기
+### 존 레몬의 유령의집 따라하기
 
 [링크](./unitylearn/README.md)
 
