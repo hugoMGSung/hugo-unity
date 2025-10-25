@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float turnSpeed = 2000f;  // 회전 속도
+    public float turnSpeed = 720f;  // 회전 속도
 
     Vector3 m_Movement;   // 캐릭터의 이동 방향 벡터
     Animator m_Animator;   // 애니메이터 연결용
@@ -23,7 +23,7 @@ public class PlayerMovement : MonoBehaviour
 
     // 물리 업데이트 처리
     void FixedUpdate()
-    { 
+    {
         horizontal = Input.GetAxis("Horizontal"); // 수평으로 입력 받기
         vertical = Input.GetAxis("Vertical"); // 수직으로 입력 받기   
 

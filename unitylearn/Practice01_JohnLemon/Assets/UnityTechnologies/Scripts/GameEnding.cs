@@ -13,9 +13,15 @@ public class GameEnding : MonoBehaviour
     public CanvasGroup exitBackgroundImageCanvasGroup;   // 페이드아웃에 사용할 캔버스 그룹
     public CanvasGroup caughtBackgroundImageCanvasGroup;    // 잡혔을 때 사용할 캔버스 그룹
 
+
+    public AudioSource exitAudio;
+    public AudioSource caughtAudio;
+
     bool m_IsPlayerAtExit;  // 플레이어가 트리거 영역에 있는지 여부
     bool m_IsPlayerCaught;  // 플레이어가 잡혔는지 여부
     float m_Timer;    // 경과 시간
+
+    bool m_HasAudioPlayed;
 
     // 이 클래스는 먼저 플레이어가 제어하는 게임 오브젝트를 감지해야 함
     void OnTriggerEnter(Collider other)
@@ -37,17 +43,23 @@ public class GameEnding : MonoBehaviour
     {
         if (m_IsPlayerAtExit)  // 플레이어가 트리거 영역에 들어왔는지 확인
         {
-            EndLevel(exitBackgroundImageCanvasGroup, false);
+            EndLevel(exitBackgroundImageCanvasGroup, false, exitAudio);
         }
         else if (m_IsPlayerCaught)  // 플레이어가 잡혔는지 확인
         {
-            EndLevel(caughtBackgroundImageCanvasGroup, true);
+            EndLevel(caughtBackgroundImageCanvasGroup, true, caughtAudio);
         }
     }
 
     // 레벨 종료 처리
-    void EndLevel(CanvasGroup imageCanvasGroup, bool doRestart)
+    void EndLevel(CanvasGroup imageCanvasGroup, bool doRestart, AudioSource audioSource)
     {
+        if (!m_HasAudioPlayed)
+        {
+            audioSource.Play();
+            m_HasAudioPlayed = true;
+        }  // 오디오 추가
+
         m_Timer += Time.deltaTime;  // 경과 시간 누적
         imageCanvasGroup.alpha = m_Timer / fadeDuration;  // 페이드아웃 효과 적용
 

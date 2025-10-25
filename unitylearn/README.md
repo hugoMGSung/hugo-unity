@@ -1158,3 +1158,128 @@
 
     https://github.com/user-attachments/assets/38ca2f93-28d1-4533-865c-4a32d48dd488
 
+##### 가고일 재배치
+
+- 가고일 2 Position을 (-2.6, 0, -8.5)
+- 가고일 2 Rotation을 (0, 30, 0)
+
+- 가고일 3 Position을 (-4.6, 0, 10.6)
+- Rotation을 (0, 134, 0)
+
+
+
+##### 오디오 시작
+
+- 소리의 식별 가능한 근원(음원)이 없는 배경음(예: 사운드트랙)
+- 식별 가능한 음원이 있는 효과음(예: 총 소리)
+
+- 오디오 구현
+    - 오디오 클립 : 특정 음향에 대한 모든 데이터가 포함된 MP3와 같은 에셋
+    - 오디오 소스 : 게임 월드에서 음원의 역할을 하는 컴포넌트
+    - 오디오 리스너 : 씬 내 단일 컴포넌트이며 플레이어에게 가상의 귀 역할
+
+- 게임 오디오 소스 생성
+    - 계층 창에서 Create 메뉴를 클릭하고 Create Empty > `Ambient` 로 이름 변경
+    - Position을 (0, 0, 0) 
+    - 위치와 무관하게 오디오 음량은 동일하므로 기술적으로는 게임 오브젝트의 위치가 중요하지 않음
+
+    - Audio Source 컴포넌트를 추가
+    - 프로젝트 창에서 SFXHouseAmbience 오디오 클립을 인스펙터 창으로 드래그
+    - Loop 체크, Volumne 조정
+    
+    ![alt text](image-71.png)
+
+- 오디오 소스 복제
+
+    - Ambient 오브젝트 복사, Escape와 Caught로 변경
+    - Play On Awake 체크박스를 비활성화
+    - Loop 체크박스를 비활성화
+    - Escape > SFXWin 설정
+    - Caught > SFXGameOver 설정
+
+    ![alt text](image-72.png)
+
+- GameEnding 스크립트 수정
+
+    - 오디오 플레이 기능 추가
+    - 스크립트 수정 - [참조](./Practice01_JohnLemon/Assets/UnityTechnologies/Scripts/GameEnding.cs)
+    - GameEnding 게임 오브젝트를 선택
+    - 오디오 프로퍼티 드래그
+
+    ![alt text](image-74.png)
+
+- 발소리 오디오 추가
+
+    - 계층 창에서 JohnLemon 게임 오브젝트를 선택
+    - AudioSource 컴포넌트를 추가
+    - AudioClip 프로퍼티를 SFXFootstepsLooping으로 설정
+    - 발소리는 효과음이지만, 기본 설정인 전체 2D로 설정된 공간 블렌드를 사용하여 JohnLemon이 이동하는 동안 음량이 달라지지 않도록 해야 함
+    - Play On Awake 체크박스를 비활성화. Loop 체크박스를 활성화
+
+- PlayerMovement 스크립트 오디오 소스 추가 수정
+
+- 오디오 리스너를 JohnLemon으로 이동
+    - 계층 구조에서 Main Camera 게임 오브젝트를 선택
+    - 인스펙터에서 Audio Listener 컴포넌트의 컨텍스트 메뉴를 클릭하고 Remove Component를 선택
+    - Audio Listener 컴포넌트를 JohnLemon에 추가
+
+- JohnLemon 프리팹 업데이트
+
+    - JohnLemon을 변경한 내용은 JohnLemon 프리팹의 인스턴스에 반영
+    - 추가된 새 컴포넌트에는 아이콘 위에 + 표시가 있어 프리팹 인스턴스에 추가됐음을 표시
+    - 계층 구조에서 JohnLemon 게임 오브젝트를 선택
+    - Overrides 드롭다운 메뉴
+    
+    ![alt text](image-75.png)
+
+    - Apply All 버튼을 클릭
+
+- 유령에 오디오 소스 추가
+
+    - `Enemies` 게임 오브젝트
+    - Ghost 게임 오브젝트 중 하나를 선택
+    - Assets > Audio 폴더를 열고 SFXGhostMove 오디오 클립
+    - 프로젝트 창에 있는 SFXGhostMove 오디오 클립을 계층 창에 있는 Ghost 게임 오브젝트로 드래그
+    - 인스펙터 창에서 Audio Source 컴포넌트
+    - Loop 프로퍼티 체크박스를 활성화
+    - Volume 프로퍼티를 0.4로 설정
+    - 전체 3D가 되도록 Spatial Blend를 1로 설정
+
+- 3D Sound Settings 기능 변경
+
+    - Audio Source 컴포넌트에서 3D Sound Settings 섹션
+    - Max Distance 프로퍼티를 10. 플레이어가 유령과 10m 떨어져 있을 때 유령의 소리를 아주 작게 청취가능
+    - Volume Rolloff는 거리에 따라 음량이 달라지는 방식을 제어. Volume Rolloff를 Custom Rolloff로 변경
+
+    ![alt text](image-76.png)
+
+- 유령 음향 효과의 방향 수정
+
+    - Audio Listener 컴포넌트는 JohnLemon에 포함되어 있는데, 이 때문에 JohnLemon이 방향을 틀면 오디오 리스너도 함께 틀어지는 문제가 발생
+    - SFXGhostMove 오디오 클립이 Stereo 대신 Mono로 플레이되도록 설정
+    - Ghost 프리팹의 Audio Source에서 3D Sound Settings
+    - Spread 프로퍼티를 180으로 설정
+
+##### 빌드, 실행, 배포
+
+- 기본 플레이어 설정
+
+    - 사용자에게 게임을 배포하기 위해 에디터에서 생성하는 애플리케이션
+    - 상단 메뉴 바에서  Edit > Project Settings로 이동하고 Player를 선택
+    - 게임 이름을 'John Lemon’s Haunted Jaunt'로 변경
+    - 다음 섹션 상단의 아래쪽 화살표 버튼은 이 섹션의 모든 설정이 PC, Mac 및 Linux 스탠드얼론 플랫폼용임을 의미
+
+- 해상도 및 화면 표시 설정
+
+    - Resolution and Presentation 섹션을 클릭
+    - Run In Background 설정은 창/애플리케이션이 상위에 표시되지 않을 때 게임 실행을 지속할지 여부를 지정
+    - Display Resolution Dialog를 Enabled로 설정했는지 확인
+
+- 빌드
+    - 상단 메뉴에서 File > Build Settings를 선택
+    - 상단의 Scenes In Build 섹션은 게임에 포함할 모든 씬을 나열
+    - Add Open Scenes를 클릭하여 목록에 추가
+    - Build를 클릭하여 빌드
+
+    - 실행파일 까지 만들기 해서 완료
+
