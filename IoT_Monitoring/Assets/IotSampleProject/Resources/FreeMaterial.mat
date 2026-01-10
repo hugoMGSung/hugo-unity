@@ -89,6 +89,7 @@ Material:
     - _CastShadows: 1
     - _Cull: 2
     - _DstBlend: 10
+    - _DstBlendAlpha: 10
     - _EdgeColorHighlightPower: 1
     - _EdgeHighlightPower: 2
     - _FadeSize: 0.02
@@ -98,6 +99,7 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _SrcBlend: 5
+    - _SrcBlendAlpha: 1
     - _Surface: 1
     - _ZTest: 8
     - _ZWrite: 0
