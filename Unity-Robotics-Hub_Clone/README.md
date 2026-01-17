@@ -480,6 +480,83 @@ Unity와 ROS 사이에서 전달되는 ROS 메시지는 ROS 내부에서 직렬�
 
         ![alt text](image-29.png)
 
+![alt text](image-30.png)
+
 ---
 
 #### ROS 측
+
+ROS 설정의 대부분은 `niryo_moveit` 패키지를 통해 제공됩니다. .launch 파일을 설명하고, 통신에 필요한 ROS 노드를 실행합니다.
+
+1. ROS 워크스페이스에서 터미널을 엽니다.(Docker)
+    - 컨테이너에서 이름 클릭 후
+    - Exec나 Open in external terminal⁠ 실행
+    - 이 터미널에서 ROS가 이 워크스페이스를 쓰도록 환경변수를 다시 로드하기 위해
+    - 다시 한 번 워크스페이스를 source한 후,
+
+        ```bash
+        source devel/setup.bash
+        ```
+
+    - 다음 roslaunch 명령을 실행합니다.
+
+        ```bash
+        roslaunch niryo_moveit part_2.launch
+        ```
+
+
+        > roslaunch를 실행하면 ROS Core가
+        > 실행 중이 아니더라도 자동으로 시작됩니다.
+
+
+        > 이 launch 파일은 아래에 참고용으로 복사되어 있습니다.
+        > server_endpoint와 trajectory_subscriber 노드는 이 파일에서 실행됩니다.
+        > 프로젝트의 launch 파일들은
+        > `src/niryo_moveit/launch/` 디렉터리에 있습니다.
+
+        ```xml
+        <launch>
+            <arg name="tcp_ip" default="0.0.0.0"/>
+            <arg name="tcp_port" default="10000"/>
+
+            <node name="server_endpoint" pkg="ros_tcp_endpoint" type="default_server_endpoint.py" args="--wait" output="screen" respawn="true">
+                <param name="tcp_ip" type="string" value="$(arg tcp_ip)"/>
+                <param name="tcp_port" type="int" value="$(arg tcp_port)"/>
+            </node>
+            <node name="trajectory_subscriber" pkg="niryo_moveit" type="trajectory_subscriber.py" args="--wait" output="screen"/>
+        </launch>
+        ```
+
+        > 10000번 포트가 아닌 다른 포트를 사용하거나,
+        > 0.0.0.0보다 더 제한적인 IP 주소에서만 수신하도록 하려면
+        > 다음과 같이 인자를 전달할 수 있습니다.
+
+        ```bash
+        roslaunch niryo_moveit part_2.launch tcp_ip:=127.0.0.1 tcp_port:=10005
+        ```
+
+        - 이 launch를 실행하면 설정된 파라미터와
+        - 실행된 노드에 대한 다양한 메시지가 콘솔에 출력됩니다.
+
+        - `process[server_endpoint]`와 `process[trajectory_subscriber]`가
+        - 성공적으로 시작되었는지 확인하고,
+        - 다음과 유사한 메시지가 출력되는지 확인하십시오.
+
+        ![alt text](image-32.png)
+
+2. Unity로 돌아가 Play 버튼을 누릅니다.
+    - Game 뷰에서 UI Button을 클릭하여
+    - SourceDestinationPublisher의 Publish() 함수를 호출합니다.
+    - roslaunch가 실행 중인 터미널을 확인하면
+    - I heard:라는 출력과 함께 데이터가 표시됩니다.
+
+이제 ROS와 Unity가 성공적으로 연결되었습니다!
+
+![alt text](image-33.png)
+
+---
+
+#### 문제해결
+
+- 한번에 접속이 안되었음. ROS 도커서버 종료 후 재시작, OS 재부팅 후 접속 성공
+- 정확히는 Unity ROS Setting의 IP를 0.0.0.0으로 입력한 문제로 보임. 127.0.0.1로 변경할 것
