@@ -758,6 +758,7 @@ def plan_trajectory(move_group, destination_pose, start_joint_angles):
 
 1. To be continued...
 
+![alt text](0_pick_place.gif)
 
 ---
 
