@@ -24,7 +24,7 @@
 
 ## 순서 따라하기
 
-### 필요 설정
+### 0. 필요 설정
 
 - Unity (가급적 2020+ 권장)
 - ROS 환경(리눅스 권장: Ubuntu / Docker / WSL2 등)
@@ -154,7 +154,7 @@ docker run -it --rm -p 10000:10000 unity-robotics:pick-and-place /bin/bash
     - 2021.1.8f1 또는 최신 개발버전
     - 2021.2.a16 또는 최신 개발버전
 
-#### URDF(Unified Robot Description Format)
+#### 1. URDF(Unified Robot Description Format)
 
 - Unity 쪽에서 그 설계도를 읽어서 실제로 움직일 수 있는 로봇 GameObject로 바꾸는 단계
 - Unity는 기본적으로 URDF를 이해하지 못하므로 URDF Importer 패키지를 사용
@@ -283,7 +283,7 @@ docker run -it --rm -p 10000:10000 unity-robotics:pick-and-place /bin/bash
     - niryo_one 오브젝트의 Controller 스크립트에서
     - Stiffness와 Damping 값이 각각 10000, 100으로 설정되어 있는지 확인
 
-### ROS TCP 작업
+### 2. ROS TCP 작업
 
 이번 단게에서 다루는 내용은 다음이 포함됩니다.
 
@@ -560,3 +560,213 @@ ROS 설정의 대부분은 `niryo_moveit` 패키지를 통해 제공됩니다. .
 
 - 한번에 접속이 안되었음. ROS 도커서버 종료 후 재시작, OS 재부팅 후 접속 성공
 - 정확히는 Unity ROS Setting의 IP를 0.0.0.0으로 입력한 문제로 보임. 127.0.0.1로 변경할 것
+
+- `[rosrun] Found the following, but they're either not files, or not executable: server_endpoint.py` 오류가 발생하면, Python 스크립트에 실행 권한을 부여해야 할 수 있습니다.
+
+    ```bash
+    chmod +x Unity-Robotics-Hub/tutorials/pick_and_place/ROS/src/niryo_moveit/scripts/server_endpoint.py
+    ```
+
+- `...failed because unknown error handler name 'rosmsg'` 오류는 오래된 패키지 버전의 버그로 인해 발생합니다. 다음 명령으로 패키지를 업데이트하십시오.
+
+    ```bash
+    sudo apt-get update && sudo apt-get upgrade
+    ```
+- Unity에서 네트워크 연결을 찾지 못하는 경우, ROS IP Address가 Unity의 RosConnect 설정에 올바르게 입력되었는지, `src/niryo_moveit/config/params.yaml`의 값이
+올바르게 설정되었는지 확인하십시오.
+
+- ROS TCP 핸드셰이크가 실패하는 경우 (Unity 측에는 `ROS-Unity server listening...`이 출력되지만 ROS 측에 `ROS-Unity Handshake received`가 출력되지 않는 경우),
+ROS IP가 params.yaml 파일에 올바르게 설정되지 않았을 수 있습니다. ROS 워크스페이스에서 다음 명령을 실행해 보십시오.
+
+    ```bash
+    echo "ROS_IP: $(hostname -I)" > src/niryo_moveit/config/params.yaml
+    ```
+- UI 버튼이 클릭되지 않는 경우, 씬 Hierarchy에 EventSystem 이 존재하는지 확인하십시오. UI 요소를 추가할 때 자동으로 생성되지만, 없다면 Hierarchy 창에서
+`(+) > UI > Event System`을 통해 추가할 수 있습니다.
+
+### 3. Pick and Place
+
+여기에서 다루는 단계에는 ROS에서 모션 플래닝 서비스를 호출하는 방법, 계산된 궤적을 기반으로 Unity Articulation Body를 이동시키는 방법, 그리고 큐브를 성공적으로 집기 위해 그리퍼 도구를 제어하는 방법이 포함됩니다.
+
+--- 
+
+#### Unity 측 (여기서 부터...)
+
+1. 아직 Part 1 에서 Unity 프로젝트 설정을 완료하지 않았거나, Part 2 에서 ROS와 Unity 통합을 완료하지 않았다면, 지금 진행하십시오.
+2. PickAndPlaceProject Unity 프로젝트가 열려 있지 않다면, Unity Hub에서 선택하여 엽니다.
+
+    > Assets/Scripts/TrajectoryPlanner.cs 스크립트를 확인하십시오.
+    > 이 스크립트에는 모션 플래닝 서비스를 호출하는 모든 로직과,
+    > 그리퍼 엔드 이펙터 도구를 제어하는 로직이 포함되어 있습니다.
+
+    > UI 버튼의 OnClick 콜백은 후반부에서
+    > 아래에 정의된 PublishJoints 함수로 다시 지정됩니다.
+
+    ```cs
+    public void PublishJoints()
+    {
+        var request = new MoverServiceRequest();
+        request.joints_input = CurrentJointConfig();
+
+        // Pick Pose
+        request.pick_pose = new PoseMsg
+        {
+            position = (m_Target.transform.position + m_PickPoseOffset).To<FLU>(),
+
+            // 하드코딩된 x/z 각도는 그리퍼가 큐브를 집기 전에
+            // 항상 타겟 큐브의 위쪽에 위치하도록 보장합니다.
+            orientation = Quaternion.Euler(90, m_Target.transform.eulerAngles.y, 0).To<FLU>()
+        };
+
+        // Place Pose
+        request.place_pose = new PoseMsg
+        {
+            position = (m_TargetPlacement.transform.position + m_PickPoseOffset).To<FLU>(),
+            orientation = m_PickOrientation.To<FLU>()
+        };
+
+        m_Ros.SendServiceMessage<MoverServiceResponse>(m_RosServiceName, request, TrajectoryResponse);
+    }
+
+    void TrajectoryResponse(MoverServiceResponse response)
+    {
+        if (response.trajectories.Length > 0)
+        {
+            Debug.Log("Trajectory returned.");
+            StartCoroutine(ExecuteTrajectories(response));
+        }
+        else
+        {
+            Debug.LogError("No trajectory returned from MoverService.");
+        }
+    }
+
+    ```
+
+    > 이 함수는 `SourceDestinationPublisher.Publish()` 함수와 유사하지만,
+    > 몇 가지 중요한 차이점이 있습니다.
+    > `pick`과 `place_pose`의 `y` 컴포넌트에 `pickPoseOffset`이 추가되어 있습니다.
+    > 이는 계산된 궤적이 타겟 오브젝트를 집기 전에
+    > 약간 위에서 대기하도록 하여 충돌 가능성을 줄이기 위함입니다.
+    > 또한, 이 함수는 개별 관절 값을 직접 할당하는 대신
+    > `CurrentJointConfig()`를 호출하여 r`equest.joints_input`을 설정합니다.
+
+    > response.trajectories는
+    > ros.SendServiceMessage의 콜백으로 지정된
+    > TrajectoryResponse() 함수에서 수신됩니다.
+    > 이 궤적들은 ExecuteTrajectories()로 전달되며
+    > 코루틴으로 실행됩니다.
+
+    ```cs
+    private IEnumerator ExecuteTrajectories(MoverServiceResponse response)
+    {
+        if (response.trajectories != null)
+        {
+            for (int poseIndex  = 0 ; poseIndex < response.trajectories.Length; poseIndex++)
+            {
+                for (int jointConfigIndex  = 0 ; jointConfigIndex < response.trajectories[poseIndex].joint_trajectory.points.Length; jointConfigIndex++)
+                {
+                    var jointPositions = response.trajectories[poseIndex].joint_trajectory.points[jointConfigIndex].positions;
+                    float[] result = jointPositions.Select(r=> (float)r * Mathf.Rad2Deg).ToArray();
+
+                    for (int joint = 0; joint < jointArticulationBodies.Length; joint++)
+                    {
+                        var joint1XDrive  = jointArticulationBodies[joint].xDrive;
+                        joint1XDrive.target = result[joint];
+                        jointArticulationBodies[joint].xDrive = joint1XDrive;
+                    }
+                    yield return new WaitForSeconds(jointAssignmentWait);
+                }
+
+                if (poseIndex == (int)Poses.Grasp)
+                    CloseGripper();
+
+                yield return new WaitForSeconds(poseAssignmentWait);
+            }
+            // 시퀀스 종료 시 그리퍼 열기
+            OpenGripper();
+        }
+    }
+    ```
+
+    > ExecuteTrajectories는 ROS 서비스 응답을 기반으로
+    > 각 관절의 xDrive.target 값을 반복적으로 설정하여
+    > 목표 궤적에 도달할 때까지 실행합니다.
+    > 포즈 단계에 따라 OpenGripper 또는 CloseGripper가 호출됩니다.
+
+3. Unity로 돌아가서 Publisher GameObject를 선택하고 TrajectoryPlanner 스크립트를 컴포넌트로 추가합니다.
+
+4. TrajectoryPlanner 컴포넌트의 멤버 변수들이 Inspector 창에 표시되며, 이 값들은 반드시 할당되어야 합니다.
+
+    - 이전과 마찬가지로 Target과 TargetPlacement 오브젝트를
+    - 각각 Target, Target Placement 필드에 드래그하여 할당합니다.
+    - niryo_one 로봇을 Niryo One 필드에 할당합니다.
+
+        ![alt text](image-35.png)
+
+5. Canvas/Button에 있는 이전에 생성한 Button 오브젝트를 선택합니다.
+    - Button 컴포넌트의 OnClick() 항목에서
+    - 현재 SourceDestinationPublisher.Publish()로 연결된 부분을
+    - TrajectoryPlanner > PublishJoints()로 교체합니다.
+
+        ![alt text](image-34.png)
+
+6. 이제 Unity 측은 ROS와 통신하여 모션 플래닝을 수행할 준비가 완료되었습니다.
+
+---
+
+#### ROS 측
+
+> src/niryo_moveit/scripts/mover.py 파일을 확인하십시오.
+> 이 스크립트는 MoverService에 대한 ROS 측 로직을 포함하고 있습니다.
+> 서비스가 호출되면 plan_pick_and_place() 함수가 실행되며,
+> 이는 Unity에서 전달된 현재 관절 구성으로부터
+> Pick-and-Place 단계에 따라 목적지 포즈까지의
+> 궤적을 계산합니다.
+
+```python
+def plan_trajectory(move_group, destination_pose, start_joint_angles):
+    current_joint_state = JointState()
+    current_joint_state.name = joint_names
+    current_joint_state.position = start_joint_angles
+
+    moveit_robot_state = RobotState()
+    moveit_robot_state.joint_state = current_joint_state
+    move_group.set_start_state(moveit_robot_state)
+
+    move_group.set_pose_target(destination_pose)
+    plan = move_group.plan()
+
+    if not plan:
+        exception_str = """
+            Trajectory could not be planned for a destination of {} with starting joint angles {}.
+            Please make sure target and destination are reachable by the robot.
+        """.format(destination_pose, destination_pose)
+        raise Exception(exception_str)
+
+    return planCompat(plan)
+
+```
+
+> 이 함수는 pre-grasp, grasp, pick up, place 포즈를 순차적으로 계산하여
+> 계획된 궤적 집합을 생성합니다.
+> 마지막으로 이 궤적 집합이 Unity로 다시 전송됩니다.
+
+---
+
+#### ROS–Unity 통신
+
+1. To be continued...
+
+
+---
+
+### 4. Pick and Place
+
+이 파트는 이전과는 조금 다르게, 실제 Niryo One 로봇을 사용합니다.
+이전 세 파트를 모두 완료했다고 가정하지만, 시뮬레이션 외부에 실제 Niryo One 로봇이 반드시 있어야 한다고 가정하지는 않습니다.
+따라서 이실제 환경에서 동작하는 로봇의 동작을 시뮬레이션하는 방법에 대한 참고 자료로 사용하는 것이 적절합니다.
+
+이하 생략.
+
+실제 내용은 [여기](https://github.com/Unity-Technologies/Unity-Robotics-Hub/blob/main/tutorials/pick_and_place/4_pick_and_place.md)를 참조
