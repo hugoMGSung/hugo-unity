@@ -590,7 +590,7 @@ ROS IP가 params.yaml 파일에 올바르게 설정되지 않았을 수 있습�
 
 --- 
 
-#### Unity 측 (여기서 부터...)
+#### Unity 측
 
 1. 아직 Part 1 에서 Unity 프로젝트 설정을 완료하지 않았거나, Part 2 에서 ROS와 Unity 통합을 완료하지 않았다면, 지금 진행하십시오.
 2. PickAndPlaceProject Unity 프로젝트가 열려 있지 않다면, Unity Hub에서 선택하여 엽니다.
@@ -717,8 +717,17 @@ ROS IP가 params.yaml 파일에 올바르게 설정되지 않았을 수 있습�
 
 #### ROS 측
 
+0. Docker 진입하기
+
+    ```bash
+    > docker ps
+    CONTAINER ID   IMAGE                           COMMAND                 CREATED        STATUS        PORTS                                             NAMES
+4c86b3ae8c51   unity-robotics:pick-and-place   "/tutorial /bin/bash"   24 hours ago   Up 24 hours   0.0.0.0:10000->10000/tcp, [::]:10000->10000/tcp   friendly_chaum
+    > docker exec -it 4c86b3ae8c51 /bin/bash
+    ```
+
 > src/niryo_moveit/scripts/mover.py 파일을 확인하십시오.
-> 이 스크립트는 MoverService에 대한 ROS 측 로직을 포함하고 있습니다.
+> 이 스크립트는 `MoverService에 대한 ROS 측 로직을 포함`하고 있습니다.
 > 서비스가 호출되면 plan_pick_and_place() 함수가 실행되며,
 > 이는 Unity에서 전달된 현재 관절 구성으로부터
 > Pick-and-Place 단계에 따라 목적지 포즈까지의
@@ -754,7 +763,7 @@ def plan_trajectory(move_group, destination_pose, start_joint_angles):
 
 ---
 
-#### ROS–Unity 통신
+#### ROS–Unity 통신 (여기서 부터...)
 
 1. To be continued...
 
