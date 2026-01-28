@@ -488,6 +488,15 @@ Unity와 ROS 사이에서 전달되는 ROS 메시지는 ROS 내부에서 직렬�
 
 ROS 설정의 대부분은 `niryo_moveit` 패키지를 통해 제공됩니다. .launch 파일을 설명하고, 통신에 필요한 ROS 노드를 실행합니다.
 
+0. Docker 진입하기
+
+    ```bash
+    > docker ps
+    CONTAINER ID   IMAGE                           COMMAND                 CREATED        STATUS        PORTS                                             NAMES
+4c86b3ae8c51   unity-robotics:pick-and-place   "/tutorial /bin/bash"   24 hours ago   Up 24 hours   0.0.0.0:10000->10000/tcp, [::]:10000->10000/tcp   friendly_chaum
+    > docker exec -it 4c86b3ae8c51 /bin/bash
+    ```
+
 1. ROS 워크스페이스에서 터미널을 엽니다.(Docker)
     - 컨테이너에서 이름 클릭 후
     - Exec나 Open in external terminal⁠ 실행
@@ -761,17 +770,131 @@ def plan_trajectory(move_group, destination_pose, start_joint_angles):
 > 계획된 궤적 집합을 생성합니다.
 > 마지막으로 이 궤적 집합이 Unity로 다시 전송됩니다.
 
+- 이 상태에서 접속하면 다음과 같은 오류가 표시됩니다.
+
+![alt text](image-37.png)
+
 ---
 
-#### ROS–Unity 통신 (여기서 부터...)
+#### ROS–Unity 통신
 
-1. To be continued...
+1. ROS 워크스페이스 설정을 완료하지 않았다면, 지금 진행하십시오.
+2. ROS 워크스페이스에서 새 터미널을 열고, 다시 한 번 워크스페이스를 source 합니다.
+    - 그런 다음 아래 roslaunch 명령을 실행하여
+    - roscore 실행, ROS 파라미터 설정, server endpoint 실행,
+    - Mover Service 노드 시작, MoveIt 실행을 수행합니다.
 
+    ```bash
+    roslaunch niryo_moveit part_3.launch
+    ```
+
+    > 참고: 이 launch 파일은 Niryo One 로봇의 궤적 계획에 필요한
+    > 모든 파일과 ROS 노드를 로드하고 실행합니다(demo.launch).
+    > 이 프로젝트의 launch 파일들은
+    > `src/niryo_moveit/launch/` 디렉터리에 있으며,
+    > 각 파일의 설명은 [여기](https://github.com/Unity-Technologies/Unity-Robotics-Hub/blob/main/tutorials/pick_and_place/moveit_file_descriptions.md)에서 확인할 수 있습니다.
+
+    - 이 launch는 설정된 파라미터와 실행된 노드에 대한
+    - 다양한 메시지를 콘솔에 출력합니다.
+    - 마지막 두 메시지는 반드시
+    - `You can start planning now!`와 `Ready to plan`이어야 합니다.
+
+    ![alt text](image-36.png)
+
+    > IP 주소나 포트를 커스터마이즈할 수 있습니다.
+
+    ```bash
+    roslaunch niryo_moveit part_3.launch tcp_ip:=127.0.0.1 tcp_port:=10005
+
+    ```
+
+3. Unity Editor로 돌아가 Play를 누릅니다.
+    - UI 버튼을 눌러 관절 구성을 ROS로 전송하면,
+    - 로봇 팔이 큐브를 집어 옮기는 모습을 확인할 수 있습니다.
+
+    - 실행 중에도 타겟 및 배치 위치를 이동하여
+    - 다른 궤적을 계산할 수 있습니다.
+
+4. ROS 로그
+
+    ```bash
+    [INFO] [1769605578.354244]: Connection from 172.17.0.1
+    [INFO] [1769605578.356863]: RegisterRosService(niryo_moveit, <class 'niryo_moveit.srv._MoverService.MoverService'>) OK
+    [INFO] [1769605578.360947]: RegisterSubscriber(/tf, <class 'tf2_msgs.msg._TFMessage.TFMessage'>) OK
+    [INFO] [1769605578.362856]: RegisterPublisher(/niryo_joints, <class 'niryo_moveit.msg._NiryoMoveitJoints.NiryoMoveitJoints'>) OK
+    [INFO] [1769605578.363912]: RegisterRosService(niryo_moveit, <class 'niryo_moveit.srv._MoverService.MoverService'>) OK
+    [INFO] [1769605578.366103]: RegisterPublisher(/niryo_joints, <class 'niryo_moveit.msg._NiryoMoveitJoints.NiryoMoveitJoints'>) OK
+    [ INFO] [1769605583.186720961]: Loading robot model 'niryo_one'...
+    [ INFO] [1769605583.186777838]: No root/virtual joint specified in SRDF. Assuming fixed joint
+    [ INFO] [1769605584.267692726]: Ready to take commands for planning group arm.
+    [ INFO] [1769605584.507941487]: Planning request received for MoveGroup action. Forwarding to planning pipeline.
+    [ INFO] [1769605584.508424704]: Planner configuration 'arm' will use planner 'geometric::RRTConnect'. Additional configuration parameters will be set when the planner is constructed.
+    [ INFO] [1769605584.508565549]: RRTConnect: Starting planning with 1 states already in datastructure
+    [ INFO] [1769605584.529301261]: RRTConnect: Created 5 states (2 start + 3 goal)
+    [ INFO] [1769605584.529374024]: Solution found in 0.020836 seconds
+    [ INFO] [1769605584.532124764]: SimpleSetup: Path simplification took 0.002704 seconds and changed from 4 to 2 states
+    [ INFO] [1769605584.568088948]: Planning request received for MoveGroup action. Forwarding to planning pipeline.
+    [ INFO] [1769605584.568585624]: Planner configuration 'arm' will use planner 'geometric::RRTConnect'. Additional configuration parameters will be set when the planner is constructed.
+    [ INFO] [1769605584.568715326]: RRTConnect: Starting planning with 1 states already in datastructure
+    [ INFO] [1769605584.580093054]: RRTConnect: Created 4 states (2 start + 2 goal)
+    [ INFO] [1769605584.580167323]: Solution found in 0.011476 seconds
+    [ INFO] [1769605584.583033029]: SimpleSetup: Path simplification took 0.002820 seconds and changed from 3 to 2 states
+    [ INFO] [1769605584.607964013]: Planning request received for MoveGroup action. Forwarding to planning pipeline.
+    [ INFO] [1769605584.608493396]: Planner configuration 'arm' will use planner 'geometric::RRTConnect'. Additional configuration parameters will be set when the planner is constructed.
+    [ INFO] [1769605584.608749478]: RRTConnect: Starting planning with 1 states already in datastructure
+    [ INFO] [1769605584.619387988]: RRTConnect: Created 4 states (2 start + 2 goal)
+    [ INFO] [1769605584.619470023]: Solution found in 0.010779 seconds
+    [ INFO] [1769605584.621190346]: SimpleSetup: Path simplification took 0.001672 seconds and changed from 3 to 2 states
+    [ INFO] [1769605584.647888110]: Planning request received for MoveGroup action. Forwarding to planning pipeline.
+    [ INFO] [1769605584.648460919]: Planner configuration 'arm' will use planner 'geometric::RRTConnect'. Additional configuration parameters will be set when the planner is constructed.
+    [ INFO] [1769605584.648602240]: RRTConnect: Starting planning with 1 states already in datastructure
+    [ INFO] [1769605584.669409230]: RRTConnect: Created 4 states (2 start + 2 goal)
+    [ INFO] [1769605584.669499640]: Solution found in 0.020927 seconds
+    [ INFO] [1769605584.672288146]: SimpleSetup: Path simplification took 0.002720 seconds and changed from 3 to 2 states
+    ```
 ![alt text](0_pick_place.gif)
 
 ---
 
-### 4. Pick and Place
+#### 문제해결
+
+##### 오류 및 경고
+
+- `RuntimeError: Unable to connect to move_group action server 'move_group' within allotted time (5s)` 오류가 발생하면,
+`roslaunch niryo_moveit part_3.launch`가 정상적으로 실행되었고
+콘솔에 `You can start planning now!`가 출력되었는지 확인하십시오.
+
+- `...failed because unknown error handler name 'rosmsg'` 오류는
+오래된 패키지 버전의 버그로 인해 발생합니다.
+다음 명령을 실행하여 업데이트하십시오.
+
+    ```bash
+    sudo apt-get update && sudo apt-get upgrade
+    ```
+##### 멈춤, 타임아웃, 프리징
+
+- Unity에서 네트워크 연결을 찾지 못하면,
+Unity의 RosConnect 설정에 입력된 ROS IP 주소와
+`src/niryo_moveit/config/params.yaml` 값이 올바른지 확인하십시오.
+
+##### 기타 문제
+
+- 로봇이 느슨하게 흔들리거나 콘솔 오류 없이 움직이지 않는 경우,
+`niryo_one` 오브젝트의 Controller 스크립트에서
+Stiffness 값을 `10000`, Damping 값을 `100`으로 설정했는지 확인하십시오.
+
+- 로봇이 잘못된 위치로 이동하거나
+포즈 실행 순서가 예상과 다를 경우,
+`shoulder_link`
+(`niryo_one/world/base_link/shoulder_link`)의
+X Drive Force Limit이 `5`인지 확인하십시오.
+
+- Unity Editor에서 Play 모드로 들어가기 전에
+모든 ROS 프로세스가 여전히 실행 중인지 확인하십시오.
+`server_endpoint` 노드는 타임아웃될 수 있으며,
+이 경우 다시 실행해야 합니다.
+
+### 4. Pick and Place (To be continued...)
 
 이 파트는 이전과는 조금 다르게, 실제 Niryo One 로봇을 사용합니다.
 이전 세 파트를 모두 완료했다고 가정하지만, 시뮬레이션 외부에 실제 Niryo One 로봇이 반드시 있어야 한다고 가정하지는 않습니다.
