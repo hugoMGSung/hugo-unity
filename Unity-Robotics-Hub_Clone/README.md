@@ -894,12 +894,47 @@ X Drive Force Limit이 `5`인지 확인하십시오.
 `server_endpoint` 노드는 타임아웃될 수 있으며,
 이 경우 다시 실행해야 합니다.
 
-### 4. Pick and Place (To be continued...)
+### 4. Pick and Place
 
 이 파트는 이전과는 조금 다르게, 실제 Niryo One 로봇을 사용합니다.
 이전 세 파트를 모두 완료했다고 가정하지만, 시뮬레이션 외부에 실제 Niryo One 로봇이 반드시 있어야 한다고 가정하지는 않습니다.
 따라서 이실제 환경에서 동작하는 로봇의 동작을 시뮬레이션하는 방법에 대한 참고 자료로 사용하는 것이 적절합니다.
 
-이하 생략.
+#### Niryo One 정보
+
+여기서는 Niryo One 로봇에서 실행되는 전체 Niryo One ROS 스택을 사용합니다.
+
+#### RobotMoveGoal 파라미터
+
+생략
+
+#### Part 3과의 차이점
+
+##### Part 3 – 순수 시뮬레이션 흐름
+
+![alt text](image-38.png)
+
+1. `TrajectoryPlanner`가 `niryo_moveit` 토픽으로 `MoverServiceRequest` 메시지를 전송
+2. `mover.py`가 네 개의 궤적을 계산하여 응답
+3. Unity에서 시뮬레이션된 Niryo One이 궤적을 실행
+
+#### Part 4 – 시뮬레이션 + 실제 로봇 흐름
+
+![alt text](image-39.png)
+
+1. `RealSimPickAndPlace.cs`가 `sim_real_pnp` 토픽으로 데이터 publish
+2. `sim_and_real_pnp.py`가 궤적을 계산하고 `RobotMove` 액션 서버에 goal 전송
+3. 동시에
+    - 액션 서버가 `robot_action/goal` 토픽으로 goal publish
+    - 실제 Niryo One이 궤적 실행
+4. Unity의 시뮬레이션 Niryo One도 동일한 goal을 구독하여 실행
+
+##### 변경 사항 요약
+- ROS Service → ROS Subscriber + Action
+- RobotMove 액션 서버 도입
+- 그리퍼 제어가 액션 서버로 이동
+- 실제 로봇 동작을 더 명확히 보기 위한 추가 포즈
 
 실제 내용은 [여기](https://github.com/Unity-Technologies/Unity-Robotics-Hub/blob/main/tutorials/pick_and_place/4_pick_and_place.md)를 참조
+
+![alt text](4_pick_and_place.gif)
