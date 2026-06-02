@@ -26,6 +26,22 @@
 
 ![alt text](image-15.png)
 
+## Study Unity 03
+
+볼 만들기
+
+![alt text](image-16.png)
+
+### 팁
+
+#### 01. 머티리얼
+
+##### 01-1. 머티리얼 생성 후 
+
+![alt text](image-17.png)
+
+
+
 ## Study Unity 04
 
 - C# 프로그래밍 입문 교재 내용 클로닝하기
@@ -167,7 +183,7 @@
 
 ### 02. 1인칭 점프게임 
 
-### 02-1. 프로젝트 진행
+#### 02-1. 프로젝트 진행
 
 1. Project Settings > Player > Other... > Active Input Handling Both 변경
 2. 재시작
@@ -184,7 +200,7 @@
 8. 코드 작성 - [소스](./Study_Unity_05/Assets/CharacterMove.cs)
 9. Capsule에 적용
 
-### 02.2. 에셋 스토어 캐릭터
+#### 02-2. 에셋 스토어 캐릭터
 
 1. Asset Store > Asset Store Web 클릭
 2. Character로 검색
@@ -261,6 +277,81 @@
         }
     }    
     ```
+
+### 03. 충돌과 음향효과
+
+#### 03-1. 작은 큐브에 중력 추가
+
+![alt text](image-19.png)
+
+- 작은 큐브에 RigidBody 추가
+
+#### 03-2. 충돌시 로그출력 스크립트 추가
+
+```cs
+private void OnCollisionEnter(Collision collision)
+{
+    print("충돌발생!");
+}
+```
+
+- 작은 큐브에 스크립트 적용
+
+![alt text](image-20.png)
+
+#### 03-3. 음향효과
+
+- 사운드 구글링으로 다운로드
+- Assets > Import New Asset 클릭
+- Audio Source 또는 큐브로 드래그앤드랍
+- Play On Awake 체크박스 해제
+
+```cs
+public class ObjectCollision : MonoBehaviour
+{
+    public AudioSource collsionSound;
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+        collsionSound = GetComponent<AudioSource>();    
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        collsionSound.Play();
+        print("충돌발생!");
+    }
+}
+```
+
+#### 03-4. 캐릭터 애니메이션 적용
+
+- 캐릭터 프리팹 Inspector내에 Animator 확인
+
+![alt text](image-21.png)
+
+- 기존 생성된 애니메이터가 있는 경우 바로 선택가능
+
+![alt text](image-22.png)
+
+![alt text](image-23.png)
+
+- 새 애니메이터 컨트롤러 생성
+
+- Create > Animation > Animator Controller 생성
+- 이름 지정후 더블클릭
+
+![alt text](image-24.png)
+
+- 애니메이터 뷰에서 상태와 상태 전이 추가
+    - Idle 드래그 추가
+    - Walk 추가
+    - Idle에서 마우스오른쪽 Make Transition 클릭
+    - Walk 클릭
+
+![alt text](image-25.png)
+
 
 #### 99. UserInterface
 
