@@ -3,6 +3,10 @@
 
 ## 유니티 기본 학습
 
+### Essentials Pathway 추천
+
+- [링크](./practice/README.md)
+
 ### 인터페이스
 
 - 인터페이스 설명
