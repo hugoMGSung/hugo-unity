@@ -10,6 +10,15 @@ public class CharacterMove : MonoBehaviour
 
     private Vector3 moveDirection = Vector3.zero;       // 실제 이동 방향 벡터
 
+    // step2. Animator 추가
+    Animator anim;
+
+    private void Start()
+    {
+        // step2. Animator 컴포넌트 가져오기
+        anim = GetComponent<Animator>();
+    }
+
     // 매 프레임마다 실행
     void Update()
     {
@@ -24,6 +33,9 @@ public class CharacterMove : MonoBehaviour
 
         // 좌우 회전 처리
         transform.Rotate(0, h * rotateSpeed * Time.deltaTime, 0);
+
+        // step2. 애니메이터에 이동값 전달
+        anim.SetFloat("Speed", Mathf.Abs(v));
 
         // 캐릭터가 바닥에 닿아있을 때만 이동 입력 처리
         if (controller.isGrounded)

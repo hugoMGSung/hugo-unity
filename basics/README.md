@@ -350,7 +350,20 @@ public class ObjectCollision : MonoBehaviour
     - Idle에서 마우스오른쪽 Make Transition 클릭
     - Walk 클릭
 
-![alt text](image-25.png)
+![alt text](image-26.png)
+
+- Parameters 탭 + 클릭
+- float 선택 `Speed` 입력
+- Idle -> Walk Transion 클릭 후 Inspector
+- `Has Exit Time` 체크 해제 - 애니메이션이 모두 끝날때가지 대기함(**중요!**)
+- Contitions List is Empty 오른쪽 아래 + 클릭
+
+![alt text](image-28.png)
+
+- Walk -> Idle 은 반대 컨디션 적용
+
+- 기존 캐릭터 동작 스크립트에 애니메이터 적용
+
 
 
 #### 99. UserInterface
