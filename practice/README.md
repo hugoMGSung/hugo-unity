@@ -245,4 +245,42 @@ Scene view tools shortcuts:
 
 https://github.com/user-attachments/assets/031fed25-9a71-48db-8800-2ecf6e1bdd62
 
-- 
+- Coin 프리펩 Box Collider > Is Trigger 활성화
+
+- 스크립트에 OnTriggerEnter 메서드 추가
+
+
+![alt text](image-15.png)
+
+
+- Ctrl+D로 Duplicate 하기
+
+![alt text](image-16.png)
+
+- 플레이어에게만 충돌을 제한
+
+![alt text](image-17.png)
+
+    - Player Tag 'Player' 선택
+    - 의자의 Mesh Collider 추가, Convex 활성화
+
+
+- Player에 점프기능 추가
+
+    ```cs
+    public float jumpForce = 5.0f;
+
+    private void Update()
+    {
+        // 입력 처리는 FixedUpdate에서 수행하므로
+        // Update에서는 별도의 작업이 필요 없습니다.
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
+        }
+    }
+    ```
+
+- 밤낮사이클 변경 - To be continued...
+
+
