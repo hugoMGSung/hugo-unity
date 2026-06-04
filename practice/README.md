@@ -243,8 +243,6 @@ Scene view tools shortcuts:
     }
     ```
 
-
-https://github.com/user-attachments/assets/3d390a86-b495-4822-b20a-83ffbc4cc747
-
+https://github.com/user-attachments/assets/031fed25-9a71-48db-8800-2ecf6e1bdd62
 
 - 
