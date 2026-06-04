@@ -231,10 +231,20 @@ Scene view tools shortcuts:
 
 - 코인 스크립트 Update() 에 추가
     ```cs
-    transform.Rotate(0, 0.7f, 0);
+    public class Collactible : MonoBehaviour
+    {
+        public float rotateSpeed = 0.7f;
+
+        // Update is called once per frame
+        void Update()
+        {
+            transform.Rotate(0, rotateSpeed, 0);
+        }
+    }
     ```
 
 
 https://github.com/user-attachments/assets/3d390a86-b495-4822-b20a-83ffbc4cc747
 
 
+- 
