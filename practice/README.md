@@ -281,6 +281,77 @@ https://github.com/user-attachments/assets/031fed25-9a71-48db-8800-2ecf6e1bdd62
     }
     ```
 
-- 밤낮사이클 변경 - To be continued...
+- 챗GPT로 밤낮사이클 변경
 
+![alt text](image-18.png)
 
+```cs
+public class DayNightCycle : MonoBehaviour
+{
+    [Header("회전 속도 설정")]
+    public float rotationSpeed = 1f;
+
+    [Header("시간 설정")]
+    [Tooltip("하루(24시간)가 지나는데 걸리는 실제 시간(초)")]
+    public float dayDuration = 60f;
+
+    private float timePassed = 0.0f;
+
+    void Start()
+    {
+        rotationSpeed = Mathf.Abs(rotationSpeed);
+    }
+
+    void Update()
+    {
+        float angleToRotate =
+            (360.0f / dayDuration) * Time.deltaTime;
+
+        transform.Rotate(
+            Vector3.right,
+            angleToRotate * rotationSpeed);
+
+        timePassed += Time.deltaTime;
+
+        if (timePassed >= dayDuration)
+        {
+            timePassed = 0.0f;
+        }
+    }
+}
+```
+
+![alt text](image-19.png)
+
+- 플레이어가 다가가면 문열기
+  - 문앞에 BoxCollider 추가
+
+![alt text](image-20.png)
+
+```cs
+public class DoorOpener : MonoBehaviour
+{
+    private Animator doorAnimator;
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+        doorAnimator = GetComponent<Animator>();   
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            if (doorAnimator != null)
+            {
+                doorAnimator.SetTrigger("Door_Open");
+            }
+        }
+    }
+}
+
+```
+
+![alt text](image-21.png)
+![alt text](image-22.png)
