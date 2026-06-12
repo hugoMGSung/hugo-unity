@@ -1,5 +1,65 @@
 # Unity Factory 실습
 
+## Industry Fundamentals Learn
+
+![alt text](image-28.png)
+
+Unity 공식 설명상 이 템플릿은 `Unity Industry 구독자` 또는 `30일 무료 체험 사용자`가 Unity Hub에서 받을 수 있고, CAD → 최적화 → 자동화 → 실시간 산업용 시뮬레이션 대시보드 흐름을 배우는 4개 튜토리얼 구조
+
+## Conveyor Belt 모델 가져오기
+
+### Part 1. 3D모델 웹사이트 1
+
+- https://www.cgtrader.com/search?free=1&keywords=conveyor+belt&suggested=1 에서 Conveyor Belt 검색 및 Free 클릭
+
+![alt text](image-29.png)
+
+- 회원가입 후 다운로드 클릭(시간 소요)
+
+![alt text](image-30.png)
+
+- OBJ 클릭
+- 다운로드 한 obj 파일을 Unity Project에 드래그
+
+![alt text](image-31.png)
+
+- 뒤집혀 나오는 이유?
+
+### Part 2. 3D모델 웹사이트 2
+
+- https://poly.pizza/ 에서 Conveyor Belt 검색
+
+![alt text](image-32.png)
+
+- Obj 파일 다운로드
+
+![alt text](image-33.png)
+
+- 압축해제 후 Project 창에 드래그 
+   - materials.mtl
+   - model.obj 
+
+![alt text](image-34.png)
+
+### Part 3. SketchFab
+
+- https://sketchfab.com/
+- EpicGames 계정으로 로그인 가능
+
+![alt text](image-35.png)
+
+- FBX 다운로드 가능
+
+![alt text](image-36.png)
+
+- Conveyor.FBX를 Project 창 Models 폴더에 드래그
+
+![alt text](image-37.png)
+
+- Textures에 포함된 다섯개 png를 Textures 폴더에 드래그
+
+![alt text](image-38.png)
+
 ## Unity Factory 에셋 가져오기
 
 ### Part 1. Unity Factory 에셋 소개

@@ -72,7 +72,8 @@ Scene view tools shortcuts:
 ![alt text](image-8.png)
 
 - 카메라 시점 이동
-    - 시점 변경 후 Ctrl+Shift+F 클릭해서 보이는 대로 카메라 시점 변환!
+    - 카메라 오브젝트 선택
+    - 시점 변경 후 `Ctrl+Shift+F` 클릭해서 보이는 대로 카메라 시점 변환!
 
 - 라이트 조정
     - Directional Light 선택
