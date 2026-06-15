@@ -538,4 +538,253 @@ namespace UnityFactorySceneHDRP
 출고
 ```
 
-계속
+#### 생산라인 오브젝트 배치
+
+![alt text](image-44.png)
+
+- LINE 2번 구성
+    - Line_05 : 짧은 컨베이어벨트
+    - Line_04 : 긴 컨베이어벨트
+    - Line_07 : 로봇팔 룸
+    - Line_05 : 짧은 컨베이어벨트
+
+#### 생산라인 오브젝트 Collider 적용
+
+- Line_05 선택
+    - 05_belt 선택 
+    - Mesh Collider 또는 Box Collider 추가
+    - Convex 체크
+
+- Line_04 동일
+
+![alt text](image-45.png)
+
+### Part 3, 생산품 박스 프리팹 생성
+
+#### 생산품 박스 생성
+
+- Cube로 생성 크기 및 위치 변경
+- Box Collider 적용
+- RigidBody 추가 및 기본 설정
+    - Constraint Freeze Rotation x,y,z 체크
+- 프리팹에 드래그
+
+### Part 4. BoxSpawner 만들기
+
+#### - 
+
+### Part 5. 컨베이어벨트 동작
+
+#### 스크립트 생성
+
+- ConveyorBelt.cs 생성
+```cs
+public class ConveyorBelt : MonoBehaviour
+{
+    public Vector3 moveDirection = Vector3.right;
+    public float speed = 0.5f;
+
+    private void OnCollisionStay(Collision collision)
+    {
+        Rigidbody rb = collision.rigidbody;
+
+        if (rb != null)
+        {
+            rb.linearVelocity =
+                moveDirection.normalized * speed;
+        }
+    }
+}
+```
+
+#### 스크립트 적용
+
+- Line_05, Line_07 의 가장 상단 Belt 오브젝트에
+- ConveyorBelt 스크립트 지정
+    - Move Direction을 해당방향으로 입력
+
+![alt text](image-46.png)
+
+
+### Part 6. 센서에 의한 컨베이어 정지
+
+#### 센서 생성
+- 빈 Object > Sensor
+- Box Collider 추가
+    - Collider 편집
+    - Is Trigger 체크
+
+![alt text](image-47.png)
+
+#### ConveyorBelt 스크립트 수정
+
+```cs
+public class ConveyorBelt : MonoBehaviour
+{
+    public Vector3 moveDirection = Vector3.right;
+    public float speed = 0.1f;
+
+    private bool isRunning = true;
+
+    private void OnCollisionStay(Collision collision)
+    {
+        if (!isRunning) return;
+
+        Rigidbody rb = collision.rigidbody;
+
+        if (rb != null)
+        {
+            rb.linearVelocity =
+                moveDirection.normalized * speed;
+        }
+    }
+
+    public void Stop()
+    {
+        isRunning = false;
+    }
+
+    public void StartBelt()
+    {
+        isRunning = true;
+    }
+}
+```
+
+#### SensorTrigger 생성 
+
+```cs
+using System.Collections;
+
+public class SensorTrigger : MonoBehaviour
+{
+    public ConveyorBelt conveyor;
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Product"))
+        {
+            StartCoroutine(Process());
+        }
+    }
+
+    private IEnumerator Process()
+    {
+        Debug.Log("제품 감지");
+        conveyor.Stop();
+        yield return new WaitForSeconds(2f);
+        conveyor.StartBelt();
+    }
+}
+```
+
+#### 인스펙터 연결
+
+```
+Sensor
+ └ SensorTrigger
+
+Conveyor
+ └ ConveyorBelt
+```
+
+- ProudctBox에 Product 태그 추가
+
+![alt text](image-48.png)
+
+![alt text](image-49.png)
+
+
+#### SensorTrigger 수정
+
+```cs
+using UnityEngine;
+using System.Collections;
+
+public class SensorTrigger : MonoBehaviour
+{
+    public ConveyorBelt conveyor;
+
+    public float StopDuration = 2.0f;
+
+    private bool isProcessing = false;
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (isProcessing) return;
+
+        if (other.CompareTag("Product"))
+        {
+            StartCoroutine(Process(other));
+        }
+    }
+
+    private IEnumerator Process(Collider product)
+    {
+        isProcessing = true;
+
+        Debug.Log("제품 감지 - 컨베이어 정지");
+        conveyor.Stop();
+
+        yield return new WaitForSeconds(StopDuration);
+
+        Debug.Log("컨베이어 재시작");
+        conveyor.StartBelt();
+
+        // 같은 박스가 센서에 남아있어도 바로 다시 감지하지 않도록 약간 대기
+        yield return new WaitForSeconds(0.5f);
+
+        isProcessing = false;
+    }
+}
+```
+
+#### ConveyorBelt 수정
+
+```cs
+public class ConveyorBelt : MonoBehaviour
+{
+    public Vector3 moveDirection = Vector3.right;
+    public float speed = 0.1f;
+
+    private bool isRunning = true;
+
+    private void OnCollisionStay(Collision collision)
+    {
+        Rigidbody rb = collision.rigidbody;
+        if (rb == null) return;
+
+        if (!isRunning)
+        {
+            rb.linearVelocity = Vector3.zero;
+            return;
+        }
+
+        Vector3 velocity = moveDirection.normalized * speed;
+
+        rb.linearVelocity = new Vector3(
+            velocity.x,
+            rb.linearVelocity.y,
+            velocity.z
+        );
+    }
+
+    public void Stop()
+    {
+        isRunning = false;
+        Debug.Log("Conveyor Stop");
+    }
+
+    public void StartBelt()
+    {
+        isRunning = true;
+        Debug.Log("Conveyor Start");
+    }
+}
+```
+
+![alt text](image-50.png)
+
+![alt text](image-51.png)
+
+- 5초 중지 후 다시 컨베이어벨트 동작 확인
