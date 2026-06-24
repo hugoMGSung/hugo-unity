@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using System.Text;
 using M2MqttUnity;
 using UnityEngine;
@@ -13,9 +13,12 @@ public class SmartHomeMqttClient : M2MqttUnityClient
 
     protected override void Start()
     {
-        brokerAddress = "192.168.45.150";
+        brokerAddress = "192.168.0.2";
         brokerPort = 1883;
         autoConnect = true;
+
+        mqttUserName = "root";
+        mqttPassword = "mqtt123456";
 
         base.Start();
     }
@@ -39,7 +42,7 @@ public class SmartHomeMqttClient : M2MqttUnityClient
     {
         string msg = Encoding.UTF8.GetString(message);
 
-        Debug.Log("MQTT ¼ö½Å Topic: " + topic);
+        Debug.Log("MQTT Topic: " + topic);
         Debug.Log(msg);
 
         receivedMessages.Add(msg);
@@ -54,7 +57,7 @@ public class SmartHomeMqttClient : M2MqttUnityClient
             string msg = receivedMessages[0];
             receivedMessages.RemoveAt(0);
 
-            // ¿©±â¼­ SmartHomeManager·Î Àü´Þ
+            // ï¿½ï¿½ï¿½â¼­ SmartHomeManagerï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             SmartHomeManager manager = FindAnyObjectByType<SmartHomeManager>();
 
             if (manager != null)
